@@ -9,6 +9,7 @@ import find_top_dx_contacts as ftdx
 import analyze_adif_mode as adm
 import analyze_greyline_dx as agd
 import analyze_weekly_traffic as awt
+import analyze_by_country as abc
 import common
 
 def main(adif_records, locator, cty_dat_path=None):
@@ -20,6 +21,7 @@ def main(adif_records, locator, cty_dat_path=None):
     adm.analyze_adif_modes(adif_records)
     agd.analyze_greyline(adif_records, locator)
     awt.analyze_weekly_traffic(adif_records)
+    abc.analyze_contacts_by_band_country(adif_records, cty_dat_path=cty_dat_path)
 
 if __name__ == "__main__":
     args = common.get_args()
