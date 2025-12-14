@@ -7,6 +7,10 @@ ADIF_FILE_PATH = 'f4lno.adif'
 # VEUILLEZ RENSEIGNER VOTRE PROPRE LOCALISATEUR QRA (ex: 'JN33')
 MY_LOCATOR = 'JN33' # <--- REMPLACEZ PAR VOTRE VRAI LOCALISATEUR QRA
 
+
+# Liste des bandes à afficher, dans l'ordre de préférence (du HF au VHF)
+ALL_BANDS = ['160m', '80m', '40m', '30m', '20m', '17m', '15m', '12m', '10m', '6m', '4m', '2m', '70cm']
+
 def locator_to_latlon(locator):
     """Convertit un localisateur QRA (4 ou 6 chars) en (Latitude, Longitude)"""
     locator = locator.upper().strip()

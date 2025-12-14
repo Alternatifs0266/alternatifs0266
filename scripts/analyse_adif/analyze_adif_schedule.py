@@ -3,8 +3,6 @@ import re
 from collections import defaultdict
 import common
 
-# Liste des bandes à afficher, dans l'ordre de préférence (du HF au VHF)
-ALL_BANDS = ['160m', '80m', '40m', '30m', '20m', '17m', '15m', '12m', '10m', '6m']
 
 def analyze_adif_log(adif_records):
     """ Analyse la répartition horaire détaillée des contacts par bande à partir des enregistrements ADIF. """
@@ -45,7 +43,7 @@ def analyze_adif_log(adif_records):
     # --- Affichage du Tableau Complet ---
 
     # 1. Création de l'en-tête du tableau
-    header = f"{'Heure':<5} | {'Total':<5} | " + " | ".join(f"{band:<5}" for band in ALL_BANDS)
+    header = f"{'Heure':<5} | {'Total':<5} | " + " | ".join(f"{band:<5}" for band in common.ALL_BANDS) + " |"
     separator = "-" * len(header)
 
     print("Répartition Horaire Détaillée (Nombre de Contacts) :")
@@ -57,15 +55,15 @@ def analyze_adif_log(adif_records):
     for hour in range(24): # Assure que toutes les heures de 00 à 23 sont affichées
         if hour not in hourly_counts:
             # Afficher une ligne vide si aucune activité n'a été enregistrée à cette heure
-            counts = [0] * len(ALL_BANDS)
+            counts = [0] * len(common.ALL_BANDS)
             total_hour = 0
         else:
             total_hour = sum(hourly_counts[hour].values())
             # Récupérer le compte pour chaque bande ou 0 si la bande est inactive
-            counts = [hourly_counts[hour].get(band, 0) for band in ALL_BANDS]
+            counts = [hourly_counts[hour].get(band, 0) for band in common.ALL_BANDS]
 
         # Formater la ligne : Heure | Total | Compte 1 | Compte 2 | ...
-        row = f"{hour:02}h | {total_hour:<5} | " + " | ".join(f"{count:<5}" for count in counts)
+        row = f"{hour:02}h   | {total_hour:<5} | " + " | ".join(f"{count:<5}" for count in counts) + " |"
         print(row)
 
     print(separator)
