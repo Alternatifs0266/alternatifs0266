@@ -115,3 +115,10 @@ def get_args(description="Analyze ADIF files"):
 
     print(f"Analyse de {args.file} avec le localisateur {args.locator}")
     return args
+
+def read_file_content(file_path):
+    """Lit le contenu d'un fichier ADIF et retourne les enregistrements."""
+    with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+        content = f.read().upper()
+        records = content.split('<EOR>')
+    return records
