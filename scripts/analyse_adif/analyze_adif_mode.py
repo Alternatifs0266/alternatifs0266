@@ -1,9 +1,8 @@
 import re
 from collections import defaultdict
 from pprint import pprint
+import common
 
-# --- Configuration ---
-ADIF_FILE_PATH = 'f4lno.adif'
 
 def analyze_adif_modes(file_path):
     # Dictionnaire pour stocker les résultats : {Heure UTC: {Mode: Compte}}
@@ -16,13 +15,13 @@ def analyze_adif_modes(file_path):
             # Lire le contenu complet et séparer par l'indicateur de fin d'enregistrement (<eor>)
             content = f.read().upper() # Conversion en majuscule pour les tags ADIF
             records = content.split('<EOR>')
-            
+
             # Expression régulière pour extraire les champs
             # MODE: cherche <MODE:X>VALUE et capture VALUE
-            re_mode = re.compile(r'<MODE:\d+>([A-Z0-9]+)') 
+            re_mode = re.compile(r'<MODE:\d+>([A-Z0-9]+)')
             # HEURE: cherche <TIME_ON:X>VALUE et capture VALUE (HHMMSS)
             re_time = re.compile(r'<TIME_ON:\d+>(\d{6})')
-            
+
             for record in records:
                 if not record.strip():
                     continue
@@ -30,45 +29,45 @@ def analyze_adif_modes(file_path):
                 # 1. Extraire le mode
                 match_mode = re_mode.search(record)
                 if not match_mode:
-                    continue 
+                    continue
 
                 mode = match_mode.group(1).strip()
                 all_modes.add(mode)
-                
+
                 # 2. Extraire l'heure (HHMMSS)
                 match_time = re_time.search(record)
                 if not match_time:
-                    continue 
+                    continue
 
                 time_on_str = match_time.group(1)
                 # L'heure UTC est les deux premiers chiffres (HH)
                 hour_utc = int(time_on_str[:2])
-                
+
                 # 3. Incrémenter le compteur
                 hourly_mode_counts[hour_utc][mode] += 1
                 total_reports += 1
 
         print(f"--- Analyse des Modes par Heure UTC (Fichier ADIF) ---")
         print(f"Total des rapports/contacts analysés: {total_reports}\n")
-        
+
         # Filtrer et trier les modes (exclure 'NIL' si présent, et trier alphabétiquement)
         sorted_modes = sorted([m for m in all_modes if m and m != 'NIL'])
-        
+
         if not sorted_modes:
             print("Aucun mode valide trouvé dans les enregistrements analysés.")
             return
 
         # --- Affichage du Tableau Complet ---
-        
+
         # 1. Création de l'en-tête du tableau
         header = f"{'Heure':<5} | {'Total':<5} | " + " | ".join(f"{mode:<5}" for mode in sorted_modes)
         separator = "-" * len(header)
-        
+
         print("Répartition Horaire des Modes (Nombre de Contacts) :")
         print(separator)
         print(header)
         print(separator)
-        
+
         # 2. Affichage des lignes de données (Heure par Heure)
         for hour in range(24): # Assure que toutes les heures de 00 à 23 sont affichées
             if hour not in hourly_mode_counts:
@@ -94,4 +93,5 @@ def analyze_adif_modes(file_path):
 
 # --- Exécution ---
 if __name__ == "__main__":
-    analyze_adif_modes(ADIF_FILE_PATH)
+    args = common.get_args("Analyse des Modes par Heure UTC")
+    analyze_adif_modes(args.file)

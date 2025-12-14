@@ -1,25 +1,9 @@
 import re
 from collections import defaultdict
-
-# --- Configuration ---
-ADIF_FILE_PATH = 'f4lno.adif'
+import common
 
 # Liste des bandes à afficher, dans l'ordre de préférence (du HF au VHF)
 ALL_BANDS = ['160m', '80m', '40m', '30m', '20m', '17m', '15m', '12m', '10m', '6m']
-
-# Mapping des fréquences (en MHz) vers les bandes amateur
-def get_band_from_frequency(freq_mhz):
-    if 1.8 <= freq_mhz < 2: return '160m'
-    elif 3.5 <= freq_mhz < 4: return '80m'
-    elif 7 <= freq_mhz < 8: return '40m'
-    elif 10 <= freq_mhz < 11: return '30m'
-    elif 14 <= freq_mhz < 15: return '20m'
-    elif 18 <= freq_mhz < 19: return '17m'
-    elif 21 <= freq_mhz < 22: return '15m'
-    elif 24 <= freq_mhz < 25: return '12m'
-    elif 28 <= freq_mhz < 30: return '10m'
-    elif 50 <= freq_mhz < 54: return '6m'
-    else: return 'Autres' # Regrouper les fréquences non standard
 
 def analyze_adif_log(file_path):
     # Dictionnaire pour stocker les résultats : {Heure UTC: {Bande: Compte}}
@@ -30,10 +14,10 @@ def analyze_adif_log(file_path):
         with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
             content = f.read().upper()
             records = content.split('<EOR>')
-            
-            re_freq = re.compile(r'<FREQ:\d+>([\d.]+)') 
+
+            re_freq = re.compile(r'<FREQ:\d+>([\d.]+)')
             re_time = re.compile(r'<TIME_ON:\d+>(\d{6})')
-            
+
             for record in records:
                 if not record.strip():
                     continue
@@ -43,33 +27,33 @@ def analyze_adif_log(file_path):
                 if not match_freq: continue
 
                 freq_mhz = float(match_freq.group(1))
-                band = get_band_from_frequency(freq_mhz)
-                
+                band = common.get_band_from_frequency(freq_mhz)
+
                 # 2. Extraire l'heure
                 match_time = re_time.search(record)
                 if not match_time: continue
 
                 time_on_str = match_time.group(1)
                 hour_utc = int(time_on_str[:2])
-                
+
                 # 3. Incrémenter le compteur
                 hourly_counts[hour_utc][band] += 1
                 total_reports += 1
 
         print(f"--- Analyse Complète des Contacts ADIF ---")
         print(f"Total des rapports/contacts analysés: {total_reports}\n")
-        
+
         # --- Affichage du Tableau Complet ---
-        
+
         # 1. Création de l'en-tête du tableau
         header = f"{'Heure':<5} | {'Total':<5} | " + " | ".join(f"{band:<5}" for band in ALL_BANDS)
         separator = "-" * len(header)
-        
+
         print("Répartition Horaire Détaillée (Nombre de Contacts) :")
         print(separator)
         print(header)
         print(separator)
-        
+
         # 2. Affichage des lignes de données (Heure par Heure)
         for hour in range(24): # Assure que toutes les heures de 00 à 23 sont affichées
             if hour not in hourly_counts:
@@ -89,10 +73,11 @@ def analyze_adif_log(file_path):
         print("\nCe tableau est la base parfaite pour établir votre schedule optimal.")
 
     except FileNotFoundError:
-        print(f"ERREUR: Le fichier {file_FILE_PATH} est introuvable. Assurez-vous qu'il est dans le même répertoire.")
+        print(f"ERREUR: Le fichier {file_path} est introuvable. Assurez-vous qu'il est dans le même répertoire.")
     except Exception as e:
         print(f"Une erreur s'est produite lors de l'analyse: {e}")
 
 # --- Exécution ---
 if __name__ == "__main__":
-    analyze_adif_log(ADIF_FILE_PATH)
+    args = common.get_args("Répartition Horaire Détaillée (Nombre de Contacts)")
+    analyze_adif_log(args.file)

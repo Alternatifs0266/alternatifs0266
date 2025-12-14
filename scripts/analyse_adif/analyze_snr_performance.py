@@ -1,42 +1,28 @@
 import re
 from collections import defaultdict
+import common
 
-# --- Configuration ---
-ADIF_FILE_PATH = 'f4lno.adif'
-
-# Mappage des fréquences vers les bandes
-def get_band_from_frequency(freq_mhz):
-    if 1.8 <= freq_mhz < 2: return '160m'
-    elif 3.5 <= freq_mhz < 4: return '80m'
-    elif 7 <= freq_mhz < 8: return '40m'
-    elif 10 <= freq_mhz < 11: return '30m'
-    elif 14 <= freq_mhz < 15: return '20m'
-    elif 18 <= freq_mhz < 19: return '17m'
-    elif 21 <= freq_mhz < 22: return '15m'
-    elif 24 <= freq_mhz < 25: return '12m'
-    elif 28 <= freq_mhz < 30: return '10m'
-    elif 50 <= freq_mhz < 54: return '6m'
-    else: return 'Autres'
 
 def analyze_snr(file_path):
     # Stockage : {(band, mode): {'snr_sum': float, 'count': int}}
     snr_data = defaultdict(lambda: {'snr_sum': 0.0, 'count': 0})
     total_contacts = 0
     contacts_with_snr = 0
-    
+
     # Regex pour extraire les champs
-    re_mode = re.compile(r'<MODE:\d+>([A-Z0-9]+)') 
-    re_freq = re.compile(r'<FREQ:\d+>([\d.]+)') 
-    
-    # *** NOUVELLE REGEX POUR APP_PSKREP_SNR ***
+    re_mode = re.compile(r'<MODE:\d+>([A-Z0-9]+)')
+    re_freq = re.compile(r'<FREQ:\d+>([\d.]+)')
+
+    # *** NOUVELLE REGEX POUR APP_PSKREP_SNR ou RST_RCVD de WSJTX ***
     # On cherche <APP_PSKREP_SNR:n> suivi d'un nombre (potentiellement négatif ou positif).
-    re_snr = re.compile(r'<APP_PSKREP_SNR:\d+:?[A-Z]*>([-+]?\d+)')
+    # re_snr = re.compile(r'<APP_PSKREP_SNR:\d+:?[A-Z]*>([-+]?\d+)|<RST_RCVD:\d+>([-+]?\d+)')
+    re_snr = re.compile(r'(?:<APP_PSKREP_SNR:\d+:?[A-Z]*>|<RST_RCVD:\d+>)([-+]?\d+)')
 
     try:
         with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
             content = f.read().upper()
             records = content.split('<EOR>')
-            
+
             for record in records:
                 if not record.strip(): continue
 
@@ -49,17 +35,17 @@ def analyze_snr(file_path):
 
                 if not (match_mode and match_freq and match_snr):
                     continue
-                
+
                 mode = match_mode.group(1).strip()
                 freq_mhz = float(match_freq.group(1))
-                band = get_band_from_frequency(freq_mhz)
-                
+                band = common.get_band_from_frequency(freq_mhz)
+
                 # Le SNR est extrait de APP_PSKREP_SNR. Conversion en float.
                 try:
                     # Assurez-vous que la valeur est numérique (ex: -12, 5)
                     snr_value = float(match_snr.group(1))
                 except ValueError:
-                    continue 
+                    continue
 
                 contacts_with_snr += 1
 
@@ -86,16 +72,16 @@ def analyze_snr(file_path):
         # --- Affichage ---
         print("\n--- Analyse de Qualité du Signal (SNR) par Mode et Bande ---")
         print(f"Total des contacts analysés : {total_contacts}")
-        print(f"Contacts avec une valeur SNR (numérique via APP_PSKREP_SNR) : {contacts_with_snr}\n")
+        print(f"Contacts avec une valeur SNR (numérique via APP_PSKREP_SNR ou RST_RCVD) : {contacts_with_snr}\n")
 
         header = f"{'Bande':<6} | {'Mode':<6} | {'Contacts':<8} | {'SNR Moyen (dB)':<20}"
         separator = "-" * len(header)
-        
+
         print("Classement des Combinaisons par SNR Moyen (Moyenne calculée avec >= 10 contacts) :")
         print(separator)
         print(header)
         print(separator)
-        
+
         for item in results:
             row = (
                 f"{item['band']:<6} | "
@@ -109,10 +95,11 @@ def analyze_snr(file_path):
         print("\n*Un SNR positif ou proche de zéro (dB) indique une excellente qualité de signal.")
 
     except FileNotFoundError:
-        print(f"ERREUR: Le fichier {ADIF_FILE_PATH} est introuvable.")
+        print(f"ERREUR: Le fichier {file_path} est introuvable.")
     except Exception as e:
         print(f"Une erreur s'est produite lors de l'analyse: {e}")
 
 # --- Exécution ---
 if __name__ == "__main__":
-    analyze_snr(ADIF_FILE_PATH)
+    args = common.get_args("Analyse de la Performance SNR")
+    analyze_snr(args.file)

@@ -1,7 +1,6 @@
-python3 analyze_adif_dx_performance.py
-python3 analyze_adif_schedule.py
-python3 analyze_snr_performance.py
-python3 find_top_dx_contacts.py
-python3 analyze_adif_mode.py
-~/.venv/bin/python analyze_greyline_dx.py
-python3 analyze_weekly_traffic.py
+if [ -n ".venv" ]; then
+    python3 -m venv .venv
+    source .venv/bin/activate
+    pip install -r requirements.txt
+fi
+.venv/bin/python analyze_adif.py "$@"
