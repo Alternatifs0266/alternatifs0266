@@ -1,4 +1,4 @@
-if [ -n ".venv" ]; then
+if [ -f ".venv" ]; then
     echo "Using existing virtual environment."
 else
     echo "Creating virtual environment..."
