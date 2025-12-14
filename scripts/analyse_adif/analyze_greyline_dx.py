@@ -1,5 +1,5 @@
+""" Analyse de la Propagation Greyline à partir d'un fichier ADIF."""
 import re
-import math
 # NOUVEL IMPORT : Ajout de timezone
 from datetime import datetime, timedelta, timezone
 from astral import LocationInfo
@@ -15,6 +15,7 @@ GREYLINE_WINDOW_MINUTES = 30
 # --- Fonction d'Analyse Principale ---
 
 def analyze_greyline(adif_records, my_locator):
+    """ Analyse la proportion de contacts DX effectués pendant les périodes Greyline. """
     my_loc_lat, my_loc_lon = common.locator_to_latlon(my_locator)
     if my_loc_lat is None:
         print(f"ERREUR: Localisateur QRA '{my_locator}' invalide ou trop court. Le programme s'arrête.")
@@ -25,7 +26,7 @@ def analyze_greyline(adif_records, my_locator):
 
     # Stockage des résultats
     total_dx_contacts = 0
-    greyline_contacts = 0
+    greyline_contacts = []
 
     # Regex
     re_date = re.compile(r'<QSO_DATE:\d+>(\d{8})')
@@ -34,7 +35,8 @@ def analyze_greyline(adif_records, my_locator):
     re_call = re.compile(r'<CALL:\d+>([A-Z0-9/]+)')
 
     for record in adif_records:
-        if not record.strip(): continue
+        if not record.strip():
+            continue
 
         # Extraction
         match_date = re_date.search(record)
@@ -42,7 +44,8 @@ def analyze_greyline(adif_records, my_locator):
         match_grid = re_grid.search(record)
         match_call = re_call.search(record)
 
-        if not (match_date and match_time and match_grid and match_call): continue
+        if not (match_date and match_time and match_grid and match_call):
+            continue
 
         # Conversion Date/Heure : UTILISATION DE timezone.utc
         qso_date_str = match_date.group(1)
@@ -52,14 +55,17 @@ def analyze_greyline(adif_records, my_locator):
         other_locator = match_grid.group(1).strip()
         callsign = match_call.group(1).strip()
 
-        if len(other_locator) < 4: continue
+        if len(other_locator) < 4:
+            continue
         other_lat, other_lon = common.locator_to_latlon(other_locator)
-        if other_lat is None: continue
+        if other_lat is None:
+            continue
 
         distance_km = common.haversine_distance(my_loc_lat, my_loc_lon, other_lat, other_lon)
 
         # 1. Filtrer uniquement le DX longue distance
-        if distance_km < MIN_DX_DISTANCE_KM: continue
+        if distance_km < MIN_DX_DISTANCE_KM:
+            continue
         total_dx_contacts += 1
 
         # 2. Calculer le lever/coucher du soleil pour les deux stations
@@ -73,15 +79,20 @@ def analyze_greyline(adif_records, my_locator):
 
         # Périodes de Greyline (lever/coucher du soleil pour les deux stations)
         greyline_times = []
-        if sun_info_my['sunrise']: greyline_times.append(sun_info_my['sunrise'])
-        if sun_info_my['sunset']: greyline_times.append(sun_info_my['sunset'])
-        if sun_info_other['sunrise']: greyline_times.append(sun_info_other['sunrise'])
-        if sun_info_other['sunset']: greyline_times.append(sun_info_other['sunset'])
+        if sun_info_my['sunrise']:
+            greyline_times.append(sun_info_my['sunrise'])
+        if sun_info_my['sunset']:
+            greyline_times.append(sun_info_my['sunset'])
+        if sun_info_other['sunrise']:
+            greyline_times.append(sun_info_other['sunrise'])
+        if sun_info_other['sunset']:
+            greyline_times.append(sun_info_other['sunset'])
 
         # 3. Vérifier si le QSO est dans la fenêtre Greyline
         is_greyline_qso = False
         for sun_time in greyline_times:
-            if sun_time is None: continue
+            if sun_time is None:
+                continue
 
             # Définir la fenêtre : [SunTime - 30 min, SunTime + 30 min]
             start_time = sun_time - timedelta(minutes=GREYLINE_WINDOW_MINUTES)
@@ -92,25 +103,28 @@ def analyze_greyline(adif_records, my_locator):
                 break
 
         if is_greyline_qso:
-            greyline_contacts += 1
+            greyline_contacts.append((callsign, qso_datetime, distance_km))
 
     # --- Affichage des Résultats ---
-    print("\n--- Analyse de Propagation Greyline (DX > {} km) ---".format(MIN_DX_DISTANCE_KM))
+    print(f"\n--- Analyse de Propagation Greyline (DX > {MIN_DX_DISTANCE_KM} km) ---")
     print(f"Fenêtre Greyline (autour du lever/coucher) : +/- {GREYLINE_WINDOW_MINUTES} minutes (Terre et DX).")
     print(f"Total des contacts DX analysés : {total_dx_contacts}")
 
     if total_dx_contacts > 0:
-        percent_greyline = (greyline_contacts / total_dx_contacts) * 100
-        print(f"Contacts effectués dans la fenêtre Greyline : {greyline_contacts}")
+        percent_greyline = (len(greyline_contacts) / total_dx_contacts) * 100
+        print(f"Contacts effectués dans la fenêtre Greyline : {len(greyline_contacts)}")
         print(f"**Pourcentage de votre DX qui s'est produit sur la Greyline : {percent_greyline:.2f} %**")
+        print(f"**Contacts Greyline : {len(greyline_contacts)}**")
+        for callsign, qso_datetime, distance_km in greyline_contacts:
+            print(f" - {callsign:<10}à {qso_datetime} ({distance_km:7.1f} km)")
 
     else:
-        print("Pas assez de contacts DX (>{}) pour une analyse Greyline significative.".format(MIN_DX_DISTANCE_KM))
+        print(f"Pas assez de contacts DX (>{MIN_DX_DISTANCE_KM} km) pour une analyse Greyline significative.")
 
 
 # --- Exécution ---
 if __name__ == "__main__":
-    args = common.get_args("Analyse de Propagation Greyline (DX > {} km)".format(MIN_DX_DISTANCE_KM))
+    args = common.get_args(f"Analyse de Propagation Greyline (DX > {MIN_DX_DISTANCE_KM} km)")
     try:
         records = common.read_file_content(args.file)
         analyze_greyline(records, args.locator)
