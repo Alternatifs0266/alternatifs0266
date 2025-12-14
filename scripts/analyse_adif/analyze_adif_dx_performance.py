@@ -1,11 +1,12 @@
+""" Analyse de Performance DX (Mode et Bande) """
 import re
-import math
 from collections import defaultdict
 import common
 
 # --- Fonction d'Analyse Principale ---
 
 def analyze_dx_performance(adif_records, my_locator):
+    """ Analyse la performance DX par mode et bande à partir des enregistrements ADIF. """
     # my_loc_lat, my_loc_lon sont calculés une seule fois
     my_loc_lat, my_loc_lon = common.locator_to_latlon(my_locator)
 
@@ -24,7 +25,8 @@ def analyze_dx_performance(adif_records, my_locator):
     re_grid = re.compile(r'<GRIDSQUARE:\d+>([A-Z]{2}\d{2}[A-Z]{0,2})') # Capture jusqu'à 6 chars (ex: JN33AA)
 
     for record in adif_records:
-        if not record.strip(): continue
+        if not record.strip():
+            continue
 
         total_contacts += 1
 

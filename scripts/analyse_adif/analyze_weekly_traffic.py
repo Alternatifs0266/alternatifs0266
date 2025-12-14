@@ -1,3 +1,4 @@
+""" Analyse du Trafic Hebdomadaire par Bande à partir d'un fichier ADIF."""
 import re
 from datetime import datetime
 from collections import defaultdict
@@ -8,6 +9,7 @@ import common
 DAYS_OF_WEEK = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'] # 0=Lundi, 6=Dimanche
 
 def analyze_weekly_traffic(adif_records):
+    """ Analyse la répartition hebdomadaire du trafic par bande à partir des enregistrements ADIF. """
     # Stockage : {bande: [contacts_lundi, contacts_mardi, ..., contacts_dimanche]}
     weekly_band_counts = defaultdict(lambda: [0] * 7)
     all_bands = set()
@@ -18,7 +20,8 @@ def analyze_weekly_traffic(adif_records):
     re_freq = re.compile(r'<FREQ:\d+>([\d.]+)')
 
     for record in adif_records:
-        if not record.strip(): continue
+        if not record.strip():
+            continue
 
         total_contacts += 1
 

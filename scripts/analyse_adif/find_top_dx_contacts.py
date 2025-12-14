@@ -1,13 +1,13 @@
+""" Script pour trouver les contacts DX les plus éloignés dans un fichier ADIF. """
 import re
-import math
 import os
-from pprint import pprint
 from cty import CTY
 import common
 
 # --- Fonction d'Analyse Principale ---
 
 def find_top_dx(adif_records, my_locator, top_n=1000, cty_dat_path=None):
+    """ Trouve les contacts DX les plus éloignés dans les enregistrements ADIF. """
     my_loc_lat, my_loc_lon = common.locator_to_latlon(my_locator)
 
     if my_loc_lat is None:
@@ -31,7 +31,8 @@ def find_top_dx(adif_records, my_locator, top_n=1000, cty_dat_path=None):
     cty = CTY(cty_dat_path) if cty_dat_path and os.path.exists(cty_dat_path) else None
 
     for record in adif_records:
-        if not record.strip(): continue
+        if not record.strip():
+            continue
 
         total_contacts += 1
 
@@ -93,7 +94,7 @@ def find_top_dx(adif_records, my_locator, top_n=1000, cty_dat_path=None):
     top_dx = all_contacts_data[:top_n]
 
     # --- Affichage ---
-    print("\n--- Top DX : Les {} Contacts les Plus Éloignés ---".format(len(top_dx)))
+    print(f"\n--- Top DX : Les {len(top_dx)} Contacts les Plus Éloignés ---")
     print(f"Position de la station : {my_locator}")
     print(f"Total des contacts lus : {total_contacts}")
     print(f"Contacts avec localisateur QRA : {contacts_with_locators}\n")

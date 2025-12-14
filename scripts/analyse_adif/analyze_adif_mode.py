@@ -1,10 +1,11 @@
+""" Analyse des Modes par Heure UTC dans un fichier ADIF."""
 import re
 from collections import defaultdict
-from pprint import pprint
 import common
 
 
 def analyze_adif_modes(adif_records):
+    """ Analyse la répartition des modes par heure UTC à partir des enregistrements ADIF. """
     # Dictionnaire pour stocker les résultats : {Heure UTC: {Mode: Compte}}
     hourly_mode_counts = defaultdict(lambda: defaultdict(int))
     all_modes = set()
@@ -41,7 +42,7 @@ def analyze_adif_modes(adif_records):
         hourly_mode_counts[hour_utc][mode] += 1
         total_reports += 1
 
-    print(f"--- Analyse des Modes par Heure UTC (Fichier ADIF) ---")
+    print("--- Analyse des Modes par Heure UTC (Fichier ADIF) ---")
     print(f"Total des rapports/contacts analysés: {total_reports}\n")
 
     # Filtrer et trier les modes (exclure 'NIL' si présent, et trier alphabétiquement)

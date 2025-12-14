@@ -1,3 +1,4 @@
+""" Analyse de la Répartition Horaire des Contacts dans un fichier ADIF."""
 import re
 from collections import defaultdict
 import common
@@ -6,6 +7,7 @@ import common
 ALL_BANDS = ['160m', '80m', '40m', '30m', '20m', '17m', '15m', '12m', '10m', '6m']
 
 def analyze_adif_log(adif_records):
+    """ Analyse la répartition horaire détaillée des contacts par bande à partir des enregistrements ADIF. """
     # Dictionnaire pour stocker les résultats : {Heure UTC: {Bande: Compte}}
     hourly_counts = defaultdict(lambda: defaultdict(int))
     total_reports = 0
@@ -19,14 +21,16 @@ def analyze_adif_log(adif_records):
 
         # 1. Extraire la fréquence
         match_freq = re_freq.search(record)
-        if not match_freq: continue
+        if not match_freq:
+            continue
 
         freq_mhz = float(match_freq.group(1))
         band = common.get_band_from_frequency(freq_mhz)
 
         # 2. Extraire l'heure
         match_time = re_time.search(record)
-        if not match_time: continue
+        if not match_time:
+            continue
 
         time_on_str = match_time.group(1)
         hour_utc = int(time_on_str[:2])
@@ -35,7 +39,7 @@ def analyze_adif_log(adif_records):
         hourly_counts[hour_utc][band] += 1
         total_reports += 1
 
-    print(f"--- Analyse Complète des Contacts ADIF ---")
+    print("--- Analyse Complète des Contacts ADIF ---")
     print(f"Total des rapports/contacts analysés: {total_reports}\n")
 
     # --- Affichage du Tableau Complet ---

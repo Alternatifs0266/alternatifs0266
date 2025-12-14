@@ -1,9 +1,11 @@
+""" Analyse de la Performance SNR à partir d'un fichier ADIF."""
 import re
 from collections import defaultdict
 import common
 
 
 def analyze_snr(adif_records):
+    """ Analyse la performance SNR par mode et bande à partir des enregistrements ADIF. """
     # Stockage : {(band, mode): {'snr_sum': float, 'count': int}}
     snr_data = defaultdict(lambda: {'snr_sum': 0.0, 'count': 0})
     total_contacts = 0
@@ -19,7 +21,8 @@ def analyze_snr(adif_records):
     re_snr = re.compile(r'(?:<APP_PSKREP_SNR:\d+:?[A-Z]*>|<RST_RCVD:\d+>)([-+]?\d+)')
 
     for record in adif_records:
-        if not record.strip(): continue
+        if not record.strip():
+            continue
 
         total_contacts += 1
 

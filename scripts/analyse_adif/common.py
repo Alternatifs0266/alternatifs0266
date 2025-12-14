@@ -70,7 +70,7 @@ def latlon_to_locator(lat, lon, precision=4):
 
 def haversine_distance(lat1, lon1, lat2, lon2):
     """Calcule la distance en km entre deux points Lat/Lon (Formule Haversine)"""
-    R = 6371  # Rayon de la Terre en kilomètres
+    r = 6371  # Rayon de la Terre en kilomètres
     lat1_rad, lon1_rad = math.radians(lat1), math.radians(lon1)
     lat2_rad, lon2_rad = math.radians(lat2), math.radians(lon2)
 
@@ -80,34 +80,47 @@ def haversine_distance(lat1, lon1, lat2, lon2):
     a = math.sin(dlat / 2)**2 + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(dlon / 2)**2
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
-    distance = R * c
+    distance = r * c
     return distance
 
 
 # Mapping des fréquences (en MHz) vers les bandes amateur
 def get_band_from_frequency(freq_mhz):
     """ Mappe une fréquence en MHz à une bande amateur """
-    if 1.8 <= freq_mhz < 2: return '160m'
-    elif 3.5 <= freq_mhz < 4: return '80m'
-    elif 7 <= freq_mhz < 8: return '40m'
-    elif 10 <= freq_mhz < 11: return '30m'
-    elif 14 <= freq_mhz < 15: return '20m'
-    elif 18 <= freq_mhz < 19: return '17m'
-    elif 21 <= freq_mhz < 22: return '15m'
-    elif 24 <= freq_mhz < 25: return '12m'
-    elif 28 <= freq_mhz < 30: return '10m'
-    elif 50 <= freq_mhz < 54: return '6m'
-    elif 70 <= freq_mhz < 72: return '4m'
-    elif 144 <= freq_mhz < 148: return '2m'
-    elif 430 <= freq_mhz < 440: return '70cm'
-    else: return 'Autres' # Regrouper les fréquences non standard
+    if 1.8 <= freq_mhz < 2:
+        return '160m'
+    if 3.5 <= freq_mhz < 4:
+        return '80m'
+    if 7 <= freq_mhz < 8:
+        return '40m'
+    if 10 <= freq_mhz < 11:
+        return '30m'
+    if 14 <= freq_mhz < 15:
+        return '20m'
+    if 18 <= freq_mhz < 19:
+        return '17m'
+    if 21 <= freq_mhz < 22:
+        return '15m'
+    if 24 <= freq_mhz < 25:
+        return '12m'
+    if 28 <= freq_mhz < 30:
+        return '10m'
+    if 50 <= freq_mhz < 54:
+        return '6m'
+    if 70 <= freq_mhz < 72:
+        return '4m'
+    if 144 <= freq_mhz < 148:
+        return '2m'
+    if 430 <= freq_mhz < 440:
+        return '70cm'
+    return 'Autres'  # Regrouper les fréquences non standard
 
 
 def get_args(description="Analyze ADIF files"):
     """Analyse les arguments de la ligne de commande"""
     parser = argparse.ArgumentParser(description=description)
-    parser.add_argument('-f', '--file', help="Chemin vers le fichier ADIF (defaut: {})".format(ADIF_FILE_PATH), default=ADIF_FILE_PATH)
-    parser.add_argument('-l', '--locator', help="Votre localisateur QRA (defaut: {})".format(MY_LOCATOR), default=MY_LOCATOR)
+    parser.add_argument('-f', '--file', help=f"Chemin vers le fichier ADIF (defaut: {ADIF_FILE_PATH})", default=ADIF_FILE_PATH)
+    parser.add_argument('-l', '--locator', help=f"Votre localisateur QRA (defaut: {MY_LOCATOR})", default=MY_LOCATOR)
     parser.add_argument('-c', '--ctydat', help="Chemin vers le fichier cty.dat pour les pays DXCC (https://www.country-files.com/)", default="cty.dat")
     args = parser.parse_args()
 

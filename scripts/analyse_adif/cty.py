@@ -1,3 +1,4 @@
+""" Module pour analyser les informations de pays à partir d'un fichier cty.dat. """
 import io
 import os
 
@@ -14,12 +15,13 @@ class CTY:
     suffixes = '()', '[]', '<>', '{}', '~~'
 
     def __init__ (self, filename):
+        # pylint: disable=unused-variable
         self.exact_callsign = {}
         self.prefix         = {}
         self.prf_max        = 0
         self.countries      = {}
         country = None
-        with io.open (filename, 'r') as f:
+        with io.open (filename, 'r', encoding='utf-8', errors='ignore') as f:
             for line in f:
                 line = line.strip ()
                 if country is None:
@@ -47,8 +49,7 @@ class CTY:
                                 self.exact_callsign [pfx] = (country, lat, lon)
                         else:
                             l = len (pfx)
-                            if l > self.prf_max:
-                                self.prf_max = l
+                            self.prf_max = max(self.prf_max, l)
                             if pfx not in self.prefix:
                                 self.prefix [pfx] = (country, lat, lon)
                     if end:
@@ -57,12 +58,16 @@ class CTY:
     # end def __init__
 
     def callsign_lookup (self, callsign):
+        """ Lookup callsign in cty.dat data
+            Returns (country, lat, lon) or None if not found
+        """
         if callsign in self.exact_callsign:
             return self.exact_callsign [callsign]
         for n in reversed (range (self.prf_max)):
             pfx = callsign [:n+1]
             if pfx in self.prefix:
                 return self.prefix [pfx]
+        return None, None, None
     # end def callsign_lookup
 
 # end class CTY
