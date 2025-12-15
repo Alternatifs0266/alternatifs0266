@@ -68,6 +68,7 @@ def prendre_capture_ecran_adsbx_simple():
         # 4. Capture
         driver.save_screenshot(NOM_FICHIER_COMPLET)
         print(f"✅ Capture d'écran complète sauvegardée sous : {NOM_FICHIER_COMPLET}")
+        driver.quit()
 
     except Exception as e:
         print(f"❌ Une erreur s'est produite : {e}")
