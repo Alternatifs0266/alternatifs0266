@@ -51,24 +51,35 @@ def analyze_adif_log(adif_records):
     print(header)
     print(separator)
 
+    # 1. Initialisation des compteurs pour les totaux par bandes
+    totals_per_band = [0] * len(common.ALL_BANDS)
+    grand_total = 0
+
     # 2. Affichage des lignes de données (Heure par Heure)
-    for hour in range(24): # Assure que toutes les heures de 00 à 23 sont affichées
+    for hour in range(24):
         if hour not in hourly_counts:
-            # Afficher une ligne vide si aucune activité n'a été enregistrée à cette heure
             counts = [0] * len(common.ALL_BANDS)
             total_hour = 0
         else:
             total_hour = sum(hourly_counts[hour].values())
-            # Récupérer le compte pour chaque bande ou 0 si la bande est inactive
             counts = [hourly_counts[hour].get(band, 0) for band in common.ALL_BANDS]
 
-        # Formater la ligne : Heure | Total | Compte 1 | Compte 2 | ...
+        # Accumulation des totaux
+        grand_total += total_hour
+        for i in range(len(counts)):
+            totals_per_band[i] += counts[i]
+
+        # Formater la ligne
         row = f"{hour:02}h   | {total_hour:<5} | " + " | ".join(f"{count:<5}" for count in counts) + " |"
         print(row)
 
+    # 3. Affichage de la ligne de TOTAL FINAL
+    separator = "-" * len(row)
     print(separator)
-    print("\nCe tableau est la base parfaite pour établir votre schedule optimal.\n")
 
+    total_row = f"TOTAL | {grand_total:<5} | " + " | ".join(f"{t:<5}" for t in totals_per_band) + " |"
+    print(total_row)
+    print(separator)
 
 # --- Exécution ---
 if __name__ == "__main__":
