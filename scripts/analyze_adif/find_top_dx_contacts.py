@@ -107,8 +107,25 @@ def find_top_dx(adif_records, my_locator, top_n=100, cty_dat_path=None):
     print(header)
     print(separator)
 
-    for i, item in enumerate(top_dx, 1):
-        # LIGNE DE DONNÉES MISE À JOUR
+    # --- FILTRAGE DES DOUBLONS ---
+    seen_calls = set()
+    unique_dx = []
+
+    # On suppose que 'all_contacts' contient tous tes QSOs extraits
+    # On les trie d'abord par distance (du plus loin au plus proche)
+    sorted_all = sorted(all_contacts_data, key=lambda x: x['distance_km'], reverse=True)
+
+    for qso in sorted_all:
+        call = qso['callsign']
+        if call not in seen_calls:
+            seen_calls.add(call)
+            unique_dx.append(qso)
+
+        # On s'arrête quand on en a 100
+        if len(unique_dx) >= 100:
+            break
+
+    for i, item in enumerate(unique_dx, 1):
         row = (
             f"{i:<4} | "
             f"{item['distance_km']:<15.2f} | "
@@ -121,7 +138,6 @@ def find_top_dx(adif_records, my_locator, top_n=100, cty_dat_path=None):
         print(row)
 
     print(separator)
-
 
 # --- Exécution ---
 if __name__ == "__main__":
