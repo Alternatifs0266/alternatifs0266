@@ -63,20 +63,36 @@ def analyze_adif_modes(adif_records):
     print(header)
     print(separator)
 
+    # 1. Initialisation des compteurs pour les totaux verticaux
+    totals_per_mode = [0] * len(sorted_modes)
+    grand_total = 0
+
     # 2. Affichage des lignes de données (Heure par Heure)
-    for hour in range(24): # Assure que toutes les heures de 00 à 23 sont affichées
+    for hour in range(24):
         if hour not in hourly_mode_counts:
-            # Afficher une ligne vide si aucune activité n'a été enregistrée à cette heure
             counts = [0] * len(sorted_modes)
             total_hour = 0
         else:
-            # Récupérer le compte pour chaque mode ou 0 si le mode est inactif
             counts = [hourly_mode_counts[hour].get(mode, 0) for mode in sorted_modes]
             total_hour = sum(counts)
 
-        # Formater la ligne : Heure | Total | Compte 1 | Compte 2 | ...
+        # Mise à jour des totaux globaux
+        grand_total += total_hour
+        for i in range(len(counts)):
+            totals_per_mode[i] += counts[i]
+
+        # Formater la ligne : Heure | Total | Compte 1 | ...
         row = f"{hour:02}h | {total_hour:<5} | " + " | ".join(f"{count:<5}" for count in counts)
         print(row)
+
+    # 3. Ligne de séparation et ligne finale des TOTAUX
+    print("-" * len(row))
+
+    total_row = (
+        f"TOT | {grand_total:<5} | " +
+        " | ".join(f"{t:<5}" for t in totals_per_mode)
+    )
+    print(total_row)
 
     print(separator)
     print(f"\nModes trouvés dans le fichier: {', '.join(sorted_modes)}\n")
