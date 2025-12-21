@@ -1,5 +1,5 @@
+"""Module to convert adif file into ascii map."""
 import re
-from collections import defaultdict
 import common
 
 
@@ -22,12 +22,12 @@ def locator_to_latlon(locator):
         lon = (ord(locator[0]) - ord('A')) * 20 - 180
         # Latitude : les deux lettres suivantes
         lat = (ord(locator[1]) - ord('A')) * 10 - 90
-        
+
         # Ajout des chiffres pour plus de précision (4 caractères)
         if len(locator) >= 4:
             lon += int(locator[2]) * 2
             lat += int(locator[3]) * 1
-            
+
         # On centre au milieu du carreau (0.5 pour la précision)
         return lat + 0.5, lon + 1.0
     except Exception:
@@ -49,14 +49,15 @@ def parse_adif_locators(filepath):
 # ----------------------------------------------------------------------
 
 def tracer_carte(locators):
+    """Trace ascii map function."""
     # Initialiser une grille vide
     grid = [[' ' for _ in range(WIDTH)] for _ in range(HEIGHT)]
-    
+
     # --- DESSINER L'ÉQUATEUR ---
-    # L'équateur est à 0° de latitude. 
+    # L'équateur est à 0° de latitude.
     # Dans notre grille (90 à -90), le milieu exact est (HEIGHT-1) / 2
     y_equateur = int(((90 - 0) / 180) * (HEIGHT - 1))
-    
+
     for x in range(WIDTH):
         grid[y_equateur][x] = '-'  # Caractère pour l'équateur
 
@@ -77,24 +78,24 @@ def tracer_carte(locators):
             x = int(((lon + 180) / 360) * (WIDTH - 1))
             # Y: 90 à -90 -> 0 à HEIGHT (le haut est 90N)
             y = int(((90 - lat) / 180) * (HEIGHT - 1))
-            
+
             if 0 <= x < WIDTH and 0 <= y < HEIGHT:
                 # 'X' écrase l'équateur si le contact est pile dessus
-                grid[y][x] = 'X' 
+                grid[y][x] = 'X'
                 points_plottes += 1
 
     # --- AFFICHAGE FINAL ---
     print("\n" + "=" * WIDTH)
     print(f" CARTE DES CONTACTS ADIF - F4LNO (Total: {len(locators)} contacts)")
     print("=" * WIDTH)
-    
+
     for row in grid:
         print("".join(row))
-        
+
     print("=" * WIDTH)
-    print(f"Légende : 'X' = Contact | '-' = Équateur")
+    print("Légende : 'X' = Contact | '-' = Équateur")
     print(f"Nombre de points affichés : {points_plottes}")
-    print(f"")
+    print("")
 
 # ----------------------------------------------------------------------
 # 4. LANCEMENT

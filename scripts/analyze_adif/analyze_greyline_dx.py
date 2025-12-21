@@ -77,7 +77,7 @@ def analyze_greyline(adif_records, my_locator):
             other_location = LocationInfo("DX Station", other_locator, "UTC", other_lat, other_lon)
             sun_info_other = sun.sun(other_location.observer, date=qso_datetime.date(), tzinfo=timezone.utc)
 
-        except (ValueError, Exception) as e:
+        except (ValueError, Exception):
             continue
 
         # Périodes de Greyline (lever/coucher du soleil pour les deux stations)

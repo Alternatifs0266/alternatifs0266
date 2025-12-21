@@ -89,7 +89,7 @@ persistent=yes
 
 # Resolve imports to .pyi stubs if available. May reduce no-member messages and
 # increase not-an-iterable messages.
-prefer-stubs=no
+#prefer-stubs=no
 
 # Minimum Python version to use for version dependent checks. Will default to
 # the version used to run pylint.
@@ -313,7 +313,7 @@ max-locals=15
 max-parents=7
 
 # Maximum number of positional arguments for function / method.
-max-positional-arguments=5
+#max-positional-arguments=5
 
 # Maximum number of public methods for a class (see R0904).
 max-public-methods=20
@@ -472,7 +472,7 @@ timeout-methods=requests.api.delete,requests.api.get,requests.api.head,requests.
 [MISCELLANEOUS]
 
 # Whether or not to search for fixme's in docstrings.
-check-fixme-in-docstring=no
+#check-fixme-in-docstring=no
 
 # List of note tags to take in consideration, separated by a comma.
 notes=FIXME,
@@ -497,7 +497,7 @@ never-returning-functions=sys.exit,argparse.parse_error
 # Let 'consider-using-join' be raised when the separator to join on would be
 # non-empty (resulting in expected fixes of the type: ``"- " + " -
 # ".join(items)``)
-suggest-join-with-non-empty-separator=yes
+#suggest-join-with-non-empty-separator=yes
 
 
 [REPORTS]
