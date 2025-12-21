@@ -90,7 +90,7 @@ def analyze_snr(adif_records):
         print(row)
 
     print(separator)
-    print("\n*Un SNR positif ou proche de zéro (dB) indique une excellente qualité de signal.")
+    print("\n*Un SNR positif ou proche de zéro (dB) indique une excellente qualité de signal.\n")
 
 
 # --- Exécution ---

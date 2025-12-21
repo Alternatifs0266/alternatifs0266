@@ -79,7 +79,7 @@ def analyze_adif_modes(adif_records):
         print(row)
 
     print(separator)
-    print(f"\nModes trouvés dans le fichier: {', '.join(sorted_modes)}")
+    print(f"\nModes trouvés dans le fichier: {', '.join(sorted_modes)}\n")
 
 
 # --- Exécution ---

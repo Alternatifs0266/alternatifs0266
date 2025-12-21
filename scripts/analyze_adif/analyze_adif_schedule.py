@@ -67,7 +67,7 @@ def analyze_adif_log(adif_records):
         print(row)
 
     print(separator)
-    print("\nCe tableau est la base parfaite pour établir votre schedule optimal.")
+    print("\nCe tableau est la base parfaite pour établir votre schedule optimal.\n")
 
 
 # --- Exécution ---

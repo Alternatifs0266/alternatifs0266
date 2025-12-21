@@ -73,7 +73,7 @@ def analyze_contacts_by_band_country(adif_records, cty_dat_path=None):
         row = f"{country[:25]:<25} | {sum(bands.values()):4}" + " | " + " | ".join(f"{count:4}" for count in counts) + " |"
         print(row)
     print(separator)
-    print(f"{'Total':<25} | {total_count:4}" + " | " + " | ".join(f"{sum(bands.get(band, 0) for bands in sorted_countries.values()):4}" for band in common.ALL_BANDS) + " |")
+    print(f"{'Total':<25} | {total_count:4}" + " | " + " | ".join(f"{sum(bands.get(band, 0) for bands in sorted_countries.values()):4}" for band in common.ALL_BANDS) + " |\n")
 
 
 # --- Exécution ---

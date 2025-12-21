@@ -77,6 +77,7 @@ def analyze_weekly_traffic(adif_records):
         print(row)
 
     print(separator)
+    print("\n")
 
 
 # --- Exécution ---
