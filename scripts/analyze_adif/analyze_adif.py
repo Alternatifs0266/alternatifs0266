@@ -11,6 +11,7 @@ import analyze_adif_mode as adm
 import analyze_greyline_dx as agd
 import analyze_weekly_traffic as awt
 import analyze_by_country as abc
+import analyze_antipode as aap
 import common
 
 def main(adif_records, adif_file, locator, cty_dat_path=None):
@@ -24,6 +25,7 @@ def main(adif_records, adif_file, locator, cty_dat_path=None):
     awt.analyze_weekly_traffic(adif_records)
     abc.analyze_contacts_by_band_country(adif_records, cty_dat_path=cty_dat_path)
     agd.analyze_greyline(adif_records, locator)
+    aap.find_closest_points(adif_records, locator)
 
 if __name__ == "__main__":
     args = common.get_args()
