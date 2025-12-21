@@ -17,15 +17,15 @@ import common
 def main(adif_records, adif_file, locator, cty_dat_path=None):
     """ Exécute toutes les analyses ADIF disponibles. """
     aam.tracer_carte(aam.parse_adif_locators(adif_file))
+    aap.find_closest_points(adif_records, locator)
     adx.analyze_dx_performance(adif_records, locator)
+    awt.analyze_weekly_traffic(adif_records)
+    adm.analyze_adif_modes(adif_records)
     ads.analyze_adif_log(adif_records)
     asp.analyze_snr(adif_records)
-    ftdx.find_top_dx(adif_records, locator, cty_dat_path=cty_dat_path)
-    adm.analyze_adif_modes(adif_records)
-    awt.analyze_weekly_traffic(adif_records)
     abc.analyze_contacts_by_band_country(adif_records, cty_dat_path=cty_dat_path)
+    ftdx.find_top_dx(adif_records, locator, cty_dat_path=cty_dat_path)
     agd.analyze_greyline(adif_records, locator)
-    aap.find_closest_points(adif_records, locator)
 
 if __name__ == "__main__":
     args = common.get_args()
