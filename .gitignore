@@ -1,5 +1,8 @@
 f4lno.adif
+*.adif
 asup.*
+asup*.*
+*.bak
 .venv/
 __pycache__/
 *.pyc
