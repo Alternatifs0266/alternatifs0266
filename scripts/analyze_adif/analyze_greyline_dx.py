@@ -125,10 +125,6 @@ def analyze_greyline(adif_records, my_locator):
             dt_format = qso_datetime.strftime("%d/%m %H:%M")
             print(f" - {callsign:<10} à {dt_format} UTC ({distance_km:7.1f} km)")
 
-        # Petit message si la liste est plus longue que 1000
-        if len(greyline_contacts) > nb_affiche:
-            print(f"\n... (Affichage limité aux 1000 premiers contacts sur {len(greyline_contacts)} trouvés)")
-
     else:
         print(f"Pas assez de contacts DX (>{MIN_DX_DISTANCE_KM} km) pour une analyse Greyline significative.")
 
