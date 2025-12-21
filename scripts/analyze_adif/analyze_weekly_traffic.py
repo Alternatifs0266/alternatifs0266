@@ -61,12 +61,20 @@ def analyze_weekly_traffic(adif_records):
     print(header)
     print(separator)
 
-    # 2. Afficher les données
+    # 1. Initialisation d'une liste pour stocker les totaux par jour (7 jours)
+    daily_totals = [0] * 7
+    grand_total = 0
+
     for band in sorted_bands:
         counts = weekly_band_counts[band]
         total_band = sum(counts)
+        grand_total += total_band
 
-        # Formatage des comptes
+        # Mise à jour des totaux par jour
+        for i in range(7):
+            daily_totals[i] += counts[i]
+
+        # Formatage des comptes pour la ligne de bande
         counts_str = " | ".join(f"{count:<10}" for count in counts)
 
         row = (
@@ -76,6 +84,18 @@ def analyze_weekly_traffic(adif_records):
         )
         print(row)
 
+    # 2. Affichage de la ligne de séparation
+    print("-" * len(row))
+
+    # 3. Affichage de la ligne TOTAL par jour
+    daily_totals_str = " | ".join(f"{total:<10}" for total in daily_totals)
+
+    total_row = (
+        f"{'TOTAL':<6} | "
+        f"{daily_totals_str} | "
+        f"{grand_total:<6}"
+    )
+    print(total_row)
     print(separator)
     print("\n")
 
