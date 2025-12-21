@@ -69,13 +69,19 @@ def analyze_greyline(adif_records, my_locator):
         total_dx_contacts += 1
 
         # 2. Calculer le lever/coucher du soleil pour les deux stations
+        try:
+            # Heures du soleil pour la station locale
+            sun_info_my = sun.sun(my_location.observer, date=qso_datetime.date(), tzinfo=timezone.utc)
 
-        # Heures du soleil pour la station locale
-        sun_info_my = sun.sun(my_location.observer, date=qso_datetime.date(), tzinfo=timezone.utc)
+            # Heures du soleil pour la station distante
+            other_location = LocationInfo("DX Station", other_locator, "UTC", other_lat, other_lon)
+            sun_info_other = sun.sun(other_location.observer, date=qso_datetime.date(), tzinfo=timezone.utc)
 
-        # Heures du soleil pour la station distante
-        other_location = LocationInfo("DX Station", other_locator, "UTC", other_lat, other_lon)
-        sun_info_other = sun.sun(other_location.observer, date=qso_datetime.date(), tzinfo=timezone.utc)
+        except (ValueError, Exception) as e:
+            # Si la librairie plante (ex: pas de sunset trouvé), on affiche l'erreur
+            # et on passe IMMEDIATEMENT au contact suivant sans s'arrêter
+            print(f" ! Saut du contact {callsign} : Erreur de calcul solaire ({e})")
+            continue
 
         # Périodes de Greyline (lever/coucher du soleil pour les deux stations)
         greyline_times = []
