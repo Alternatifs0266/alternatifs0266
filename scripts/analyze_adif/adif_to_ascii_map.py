@@ -94,6 +94,7 @@ def tracer_carte(locators):
     print("=" * WIDTH)
     print(f"Légende : 'X' = Contact | '-' = Équateur")
     print(f"Nombre de points affichés : {points_plottes}")
+    print(f"")
 
 # ----------------------------------------------------------------------
 # 4. LANCEMENT
