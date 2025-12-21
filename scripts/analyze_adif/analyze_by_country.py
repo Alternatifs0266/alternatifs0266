@@ -79,7 +79,7 @@ def analyze_contacts_by_band_country(adif_records, cty_dat_path=None):
 
     # --- LIGNE DE TOTAL MODIFIÉE ---
     # On calcule le nombre de pays via len(sorted_countries)
-    label_total = f"Total = {len(sorted_countries)}"
+    label_total = f"Total = {len(sorted_countries)}/340"
 
     total_row = (
         f"{label_total:<25} | {total_count:5} | " +
