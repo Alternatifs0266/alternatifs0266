@@ -6,7 +6,7 @@ import common
 
 # --- Fonction d'Analyse Principale ---
 
-def find_top_dx(adif_records, my_locator, top_n=1000, cty_dat_path=None):
+def find_top_dx(adif_records, my_locator, top_n=100, cty_dat_path=None):
     """ Trouve les contacts DX les plus éloignés dans les enregistrements ADIF. """
     my_loc_lat, my_loc_lon = common.locator_to_latlon(my_locator)
 

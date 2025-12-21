@@ -121,8 +121,8 @@ def analyze_greyline(adif_records, my_locator):
         print(f"Contacts effectués dans la fenêtre Greyline : {len(greyline_contacts)}")
         print(f"**Pourcentage de votre DX qui s'est produit sur la Greyline : {percent_greyline:.2f} %**")
         print(f"**Contacts Greyline : {len(greyline_contacts)}**")
-        # --- Affichage des Résultats (Limité aux 1000 premiers) ---
-        nb_affiche = 1000
+        # --- Affichage des Résultats (Limité aux 100 premiers) ---
+        nb_affiche = 100
         for callsign, qso_datetime, distance_km in greyline_contacts[:nb_affiche]:
             # Formatage de la date pour plus de lisibilité (JJ/MM HH:MM)
             dt_format = qso_datetime.strftime("%d/%m %H:%M")
