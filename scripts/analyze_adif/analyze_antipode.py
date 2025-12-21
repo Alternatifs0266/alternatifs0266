@@ -33,7 +33,6 @@ def find_closest_points(adif_records, my_loc):
     print(f"--- Records de proximité pour {my_loc} ---")
     for name, data in results.items():
         print(f"{name:<12}: {data['call'] or 'Aucun':<10} à {data['dist']:7.1f} km du point idéal")
-    print("")
 
 if __name__ == "__main__":
     args = common.get_args()

@@ -97,8 +97,7 @@ def analyze_weekly_traffic(adif_records):
     )
     print(total_row)
     print(separator)
-    print("\n")
-
+    print("")
 
 # --- Exécution ---
 if __name__ == "__main__":

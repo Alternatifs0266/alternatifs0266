@@ -99,8 +99,7 @@ def analyze_dx_performance(adif_records, my_locator):
         print(row)
 
     print(separator)
-    print("\n*La Distance Moyenne (km) est l'indicateur clé de la performance DX.\n")
-
+    print("\n*La Distance Moyenne (km) est l'indicateur clé de la performance DX.")
 
 # --- Exécution ---
 if __name__ == "__main__":
