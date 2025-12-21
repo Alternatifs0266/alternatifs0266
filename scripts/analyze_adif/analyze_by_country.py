@@ -67,15 +67,27 @@ def analyze_contacts_by_band_country(adif_records, cty_dat_path=None):
     separator = "-" * len(header)
     print(header)
     print(separator)
+
     sorted_countries = dict(sorted(contacts_by_country.items()))
+
     for country, bands in sorted_countries.items():
         counts = [bands.get(band, 0) for band in common.ALL_BANDS]
-        row = f"{country[:25]:<25} | {sum(bands.values()):4}" + " | " + " | ".join(f"{count:4}" for count in counts) + " |"
+        row = f"{country[:25]:<25} | {sum(bands.values()):5}" + " | " + " | ".join(f"{count:4}" for count in counts) + " |"
         print(row)
-    print(separator)
-    print(f"{'Total':<25} | {total_count:4}" + " | " + " | ".join(f"{sum(bands.get(band, 0) for bands in sorted_countries.values()):4}" for band in common.ALL_BANDS))
+
     print(separator)
 
+    # --- LIGNE DE TOTAL MODIFIÉE ---
+    # On calcule le nombre de pays via len(sorted_countries)
+    label_total = f"Total = {len(sorted_countries)}"
+
+    total_row = (
+        f"{label_total:<25} | {total_count:5} | " +
+        " | ".join(f"{sum(bands.get(band, 0) for bands in sorted_countries.values()):4}" for band in common.ALL_BANDS) +
+        " |"
+    )
+    print(total_row)
+    print(separator)
 
 # --- Exécution ---
 if __name__ == "__main__":
