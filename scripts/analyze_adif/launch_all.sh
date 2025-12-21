@@ -1,3 +1,4 @@
+#!/bin/bash
 if [ -d ".venv" ]; then
     echo "Using existing virtual environment."
 else
