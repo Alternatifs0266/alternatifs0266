@@ -78,9 +78,6 @@ def analyze_greyline(adif_records, my_locator):
             sun_info_other = sun.sun(other_location.observer, date=qso_datetime.date(), tzinfo=timezone.utc)
 
         except (ValueError, Exception) as e:
-            # Si la librairie plante (ex: pas de sunset trouvé), on affiche l'erreur
-            # et on passe IMMEDIATEMENT au contact suivant sans s'arrêter
-            print(f" ! Saut du contact {callsign} : Erreur de calcul solaire ({e})")
             continue
 
         # Périodes de Greyline (lever/coucher du soleil pour les deux stations)
