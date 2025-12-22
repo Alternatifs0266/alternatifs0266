@@ -12,11 +12,13 @@ import analyze_greyline_dx as agd
 import analyze_weekly_traffic as awt
 import analyze_by_country as abc
 import analyze_antipode as aap
+import generate_antenna_pattern as gap
 import common
 
 def main(adif_records, adif_file, locator, cty_dat_path=None):
     """ Exécute toutes les analyses ADIF disponibles. """
     aam.tracer_carte(aam.parse_adif_locators(adif_file))
+    gap.draw_star_radar(adif_records, locator)
     aap.find_closest_points(adif_records, locator)
     adx.analyze_dx_performance(adif_records, locator)
     awt.analyze_weekly_traffic(adif_records)
