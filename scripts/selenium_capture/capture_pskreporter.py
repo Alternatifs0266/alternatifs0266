@@ -7,7 +7,7 @@ import subprocess
 import signal
 
 # --- PARAMÈTRES PSKREPORTER ---
-URL = "https://pskreporter.info/pskmap.html#preset&callsign=f4lno&timerange=86400&mapCenter=16.4296,14.6259,2.41"
+URL = "https://pskreporter.info/pskmap.html#preset&callsign=F4LNO&txrx=rx&timerange=86400&mapCenter=16.4296,14.6259,2.41"
 NOM_FICHIER_COMPLET = "/tmp/pskreporter_capture_full.png"
 NOM_FICHIER_ROGNE = "/var/www/html/pskreporter_map_rognee.png" 
 TEMPS_ATTENTE_CARTE = 120    # Temps d'attente pour le chargement de la carte et des données.
