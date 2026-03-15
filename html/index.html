@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+	<meta name="description" content="Aperçu temps réel de mon système solaire personnel sur serveur Ubuntu.">
+
+	<meta property="og:type" content="website">
+	<meta property="og:url" content="https://14alt266.freeboxos.fr/">
+	<meta property="og:title" content="Alternatifs World's">
+	<meta property="og:description" content="Un système solaire en 3D avec positions réelles, tournant sur Apache.">
+	<meta property="og:image" content="https://14alt266.freeboxos.fr/rendu.png">
+
+	<meta property="twitter:card" content="summary_large_image">
+	<meta property="twitter:url" content="https://14alt266.freeboxos.fr/">
+	<meta property="twitter:title" content="Alternatifs World's">
+	<meta property="twitter:description" content="Un système solaire en 3D avec positions réelles, tournant sur Apache.">
+	<meta property="twitter:image" content="https://14alt266.freeboxos.fr/rendu.png">
+
+	<meta name="theme-color" content="#08060a">
+    <title>Alternatifs World's</title>
+    <style>
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #050508; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+<canvas id="cosmicCanvas"></canvas>
+
+<script>
+    const canvas = document.getElementById('cosmicCanvas');
+    const ctx = canvas.getContext('2d');
+    let width, height, nebulaClouds = [], stars = [];
+
+    // --- CONFIGURATION SYSTÈME SOLAIRE ---
+    const tilt = 0.25;         // Inclinaison verticale (75°)
+    const rotationPlan = -0.2; // Inclinaison horizontale (~ -12 degrés)
+    const timeScale = 0.5;      // Vitesse d'animation (1s = 0.5 jour)
+    const startTime = Date.now();
+
+    const planets = [
+        { name: "Mercure", dist: 50,  size: 2.8, color: "#A5A5A5", period: 88,    long0: 252 },
+        { name: "Vénus",   dist: 80,  size: 4.8, color: "#E3BB76", period: 224,   long0: 181 },
+        { name: "Terre",   dist: 110, size: 5.2, color: "#2271B1", period: 365,   long0: 100 },
+        { name: "Mars",    dist: 145, size: 3.8, color: "#C1440E", period: 687,   long0: 355 },
+        { name: "Jupiter", dist: 210, size: 11,  color: "#D8CA9D", period: 4331,  long0: 34  },
+        { name: "Saturne", dist: 275, size: 9.5, color: "#F2D399", period: 10747, long0: 50  },
+        { name: "Uranus",  dist: 330, size: 7.5, color: "#ACE5EE", period: 30589, long0: 313 },
+        { name: "Neptune", dist: 380, size: 7,   color: "#4B70DD", period: 60189, long0: 304 }
+    ];
+
+    function init() {
+        width = window.innerWidth; height = window.innerHeight;
+        canvas.width = width; canvas.height = height;
+        nebulaClouds = []; stars = [];
+        for (let i = 0; i < 45; i++) {
+            nebulaClouds.push({
+                x: Math.random() * width, y: Math.random() * height,
+                size: Math.random() * (width * 0.8) + (width * 0.2), 
+                opacity: Math.random() * 0.04 + 0.01,
+                color: Math.random() > 0.5 ? 'rgba(80, 30, 10, 0.03)' : 'rgba(50, 10, 40, 0.02)',
+                pulse: Math.random() * 0.0003 + 0.0001,
+                dx: (Math.random() - 0.5) * 0.02, dy: (Math.random() - 0.5) * 0.02
+            });
+        }
+        for (let i = 0; i < 600; i++) {
+            stars.push({ x: Math.random() * width, y: Math.random() * height, s: Math.random() * 1.6, op: Math.random(), b: Math.random() * 0.005 + 0.002 });
+        }
+    }
+
+    function drawSphere(x, y, radius, color, isSun = false) {
+        ctx.save();
+        if (isSun) {
+            const sunG = ctx.createRadialGradient(x, y, 0, x, y, radius * 2);
+            sunG.addColorStop(0, '#FFF59D'); sunG.addColorStop(0.5, '#FBC02D'); sunG.addColorStop(1, 'transparent');
+            ctx.fillStyle = sunG;
+            ctx.beginPath(); ctx.arc(x, y, radius * 2, 0, Math.PI * 2); ctx.fill();
+        }
+        
+        // Base de la planète
+        ctx.fillStyle = color;
+        ctx.beginPath(); ctx.arc(x, y, radius, 0, Math.PI * 2); ctx.fill();
+
+        // Ombrage 3D (Highlight vers le Soleil au centre)
+        const grad = ctx.createRadialGradient(x - radius * 0.3, y - radius * 0.3, 0, x, y, radius);
+        grad.addColorStop(0, 'rgba(255, 255, 255, 0.3)');
+        grad.addColorStop(0.6, 'rgba(0, 0, 0, 0)');
+        grad.addColorStop(1, 'rgba(0, 0, 0, 0.5)');
+        ctx.fillStyle = grad;
+        ctx.fill();
+        ctx.restore();
+    }
+
+    function draw() {
+        // --- NÉBULEUSE & ÉTOILES ---
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.fillStyle = '#08060a'; ctx.fillRect(0, 0, width, height);
+        ctx.globalCompositeOperation = 'lighter';
+        nebulaClouds.forEach(c => {
+            let g = ctx.createRadialGradient(c.x, c.y, 0, c.x, c.y, c.size);
+            g.addColorStop(0, c.color.replace('0.03', c.opacity).replace('0.02', c.opacity));
+            g.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = g;
+            ctx.beginPath(); ctx.arc(c.x, c.y, c.size, 0, Math.PI*2); ctx.fill();
+            c.opacity += c.pulse; if (c.opacity > 0.08 || c.opacity < 0.01) c.pulse = -c.pulse;
+            c.x += c.dx; c.y += c.dy;
+            if(c.x < -c.size) c.x = width + c.size; if(c.x > width + c.size) c.x = -c.size;
+        });
+        stars.forEach(s => {
+            ctx.fillStyle = `rgba(255, 245, 230, ${s.op})`;
+            ctx.beginPath(); ctx.arc(s.x, s.y, s.s, 0, Math.PI*2); ctx.fill();
+            s.op += s.b; if (s.op > 1 || s.op < 0.1) s.b = -s.b;
+        });
+
+        // --- SYSTÈME SOLAIRE ---
+        ctx.globalCompositeOperation = 'source-over';
+        const cx = width / 2; const cy = height / 2;
+        const simDays = ((Date.now() - startTime) / 1000) * timeScale;
+
+        // Soleil
+        drawSphere(cx, cy, 20, "#FBC02D", true);
+
+        planets.forEach(p => {
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(rotationPlan); // Inclinaison horizontale
+
+            // Dessin Orbite
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+            ctx.beginPath(); ctx.ellipse(0, 0, p.dist, p.dist * tilt, 0, 0, Math.PI * 2); ctx.stroke();
+
+            // Calcul Position
+            let angle = ((p.long0 + (360 / p.period) * simDays) % 360) * (Math.PI / 180);
+            let rawX = Math.cos(angle) * p.dist;
+            let rawY = Math.sin(angle) * p.dist * tilt;
+
+            // Dessin Planète (en annulant la rotation pour que la sphère ne soit pas déformée)
+            ctx.rotate(-rotationPlan); 
+            // On recalcule x et y après rotation du plan pour dessiner la sphère droite
+            let finalX = rawX * Math.cos(rotationPlan) - rawY * Math.sin(rotationPlan);
+            let finalY = rawX * Math.sin(rotationPlan) + rawY * Math.cos(rotationPlan);
+            
+            drawSphere(finalX, finalY, p.size, p.color);
+            ctx.restore();
+        });
+
+        requestAnimationFrame(draw);
+    }
+
+    window.addEventListener('resize', init);
+    init(); draw();
+</script>
+</body>
+</html>
