@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculateur de Pertes Complet - Radioamateur</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h2, h3 {
+            color: #333;
+            border-bottom: 2px solid #007BFF;
+            padding-bottom: 5px;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .result {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #007BFF;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            font-size: 14px;
+        }
+        th {
+            background-color: #007BFF;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        hr {
+            border: 0;
+            border-top: 1px solid #ddd;
+            margin: 30px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>⚡ Calculateur de Chute de Tension (Continu / DC)</h2>
+    <div class="section">
+        <div class="form-group">
+            <label for="dc-current">Courant consommé (Ampères - A) :</label>
+            <input type="number" id="dc-current" value="6" step="0.1" oninput="calculateDC()">
+        </div>
+        <div class="form-group">
+            <label for="dc-length">Longueur du câble (Aller simple en mètres) :</label>
+            <input type="number" id="dc-length" value="2" step="0.1" oninput="calculateDC()">
+        </div>
+        <div class="form-group">
+            <label for="dc-section">Section du câble (mm²) :</label>
+            <input type="number" id="dc-section" value="0.75" step="0.05" min="0.1" oninput="calculateDC()">
+        </div>
+        <div class="result" id="dc-result">Résultat : -</div>
+    </div>
+
+    <hr>
+
+    <h2>📡 Calculateur de Pertes RF (Coaxial)</h2>
+    <div class="section">
+        <div class="form-group">
+            <label for="rf-cable">Type de câble :</label>
+            <select id="rf-cable" onchange="calculateRF()">
+                <option value="rg174">RG-174 (Très fin - ~2.8 mm)</option>
+                <option value="rg316">RG-316 (Fin téflon - ~2.5 mm)</option>
+                <option value="rg58" selected>RG-58 (Standard - ~5 mm)</option>
+                <option value="lmr195">LMR-195 (Souple blindé - ~5 mm)</option>
+                <option value="h155">H-155 / H155 (Souple - ~5.4 mm)</option>
+                <option value="lmr240">LMR-240 (Intermédiaire - ~6.1 mm)</option>
+                <option value="rg213">RG-213 (Militaire standard - ~10 mm)</option>
+                <option value="rg8">RG-8 (Large - ~10 mm)</option>
+                <option value="lmr400">LMR-400 (Faible perte - ~10 mm)</option>
+                <option value="aircom">Aircom Plus (Faible perte - ~10.3 mm)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="rf-freq">Fréquence (MHz) :</label>
+            <input type="number" id="rf-freq" value="2400" step="1" oninput="calculateRF()">
+        </div>
+        <div class="form-group">
+            <label for="rf-length">Longueur du câble (mètres) :</label>
+            <input type="number" id="rf-length" value="2" step="0.1" oninput="calculateRF()">
+        </div>
+        <div class="form-group">
+            <label for="rf-power">Puissance (Watts) :</label>
+            <input type="number" id="rf-power" value="2" step="0.1" oninput="calculateRF()">
+        </div>
+        <div class="result" id="rf-result">Résultat : -</div>
+    </div>
+
+    <hr>
+
+    <h3>📊 Référence : Pertes et Paramètres des Connecteurs & Adaptateurs</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Type de Connecteur / Adaptateur</th>
+                <th>Fréquence Max usuelle</th>
+                <th>Perte d'insertion typique</th>
+                <th>Remarques / Usage principal</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>SMA</strong> (Mâle / Femelle)</td>
+                <td>18 GHz (voire 26.5 GHz)</td>
+                <td>~ 0.1 à 0.2 dB</td>
+                <td>Standard micro-ondes, Pluto+, petits amplis.</td>
+            </tr>
+            <tr>
+                <td><strong>Connecteur Tonneau / Canon SMA</strong> (M-M ou F-F)</td>
+                <td>12 GHz</td>
+                <td>~ 0.2 à 0.3 dB</td>
+                <td>Raccord inter-pigtails ou traversée de boîtier.</td>
+            </tr>
+            <tr>
+                <td><strong>N</strong> (Mâle / Femelle)</td>
+                <td>11 GHz (Precision 18 GHz)</td>
+                <td>~ 0.1 à 0.15 dB</td>
+                <td>Standard robuste pour VHF/UHF et micro-ondes (QO-100).</td>
+            </tr>
+            <tr>
+                <td><strong>Connecteur Tonneau / Canon N</strong> (M-M ou F-F)</td>
+                <td>10 GHz</td>
+                <td>~ 0.2 dB</td>
+                <td>Jonction de deux câbles N.</td>
+            </tr>
+            <tr>
+                <td><strong>BNC</strong> (Mâle / Femelle)</td>
+                <td>4 GHz</td>
+                <td>~ 0.2 à 0.3 dB</td>
+                <td>Fréquent en HF / instrumentation basse fréquence.</td>
+            </tr>
+            <tr>
+                <td><strong>UHF / PL-259 / SO-239</strong></td>
+                <td>300 MHz (Max 500 MHz)</td>
+                <td>~ 0.1 à 0.2 dB</td>
+                <td>HF classique (interdit / mauvais au-delà de 500 MHz).</td>
+            </tr>
+            <tr>
+                <td><strong>TNC</strong> (Mâle / Femelle)</td>
+                <td>11 GHz</td>
+                <td>~ 0.15 à 0.25 dB</td>
+                <td>Version vissée du BNC, très bon en RF/militaire.</td>
+            </tr>
+            <tr>
+                <td><strong>F</strong> (TV / Satellite)</td>
+                <td>3 GHz</td>
+                <td>~ 0.1 à 0.2 dB</td>
+                <td>Standard 75 Ohms (LNB standard, paraboles TV).</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    // Calcul de la chute de tension DC (Cuivre, rho ≈ 0.0175 ohm.mm²/m)
+    function calculateDC() {
+        const I = parseFloat(document.getElementById('dc-current').value) || 0;
+        const L = parseFloat(document.getElementById('dc-length').value) || 0;
+        const S = parseFloat(document.getElementById('dc-section').value) || 1;
+        
+        if (S <= 0) {
+            document.getElementById('dc-result').innerHTML = "Erreur : La section doit être supérieure à 0.";
+            return;
+        }
+
+        const rho = 0.0175; // Résistivité du cuivre à 20°C
+        const resistance = (2 * L * rho) / S; // Boucle aller-retour
+        const dropV = resistance * I;
+        const powerLoss = dropV * I;
+
+        document.getElementById('dc-result').innerHTML = 
+            `Chute de tension : <strong>${dropV.toFixed(3)} V</strong> | Résistance de la ligne : ${resistance.toFixed(4)} Ω | Puissance dissipée : ${powerLoss.toFixed(2)} W`;
+    }
+
+    // Calcul des pertes RF basé sur l'atténuation de référence à 100 MHz
+    function calculateRF() {
+        const cableType = document.getElementById('rf-cable').value;
+        const freqMHz = parseFloat(document.getElementById('rf-freq').value) || 100;
+        const lengthM = parseFloat(document.getElementById('rf-length').value) || 1;
+        const power = parseFloat(document.getElementById('rf-power').value) || 10;
+
+        // Atténuation de base pour 100m à 100 MHz
+        let baseAttenuation100m100MHz = 17; // par défaut (RG-58)
+        
+        switch(cableType) {
+            case 'rg174': baseAttenuation100m100MHz = 34; break;
+            case 'rg316': baseAttenuation100m100MHz = 22; break;
+            case 'rg58':  baseAttenuation100m100MHz = 17; break;
+            case 'lmr195': baseAttenuation100m100MHz = 15; break;
+            case 'h155':  baseAttenuation100m100MHz = 11; break;
+            case 'lmr240': baseAttenuation100m100MHz = 10; break;
+            case 'rg213': baseAttenuation100m100MHz = 7.5; break;
+            case 'rg8':   baseAttenuation100m100MHz = 6.5; break;
+            case 'lmr400': baseAttenuation100m100MHz = 4.5; break;
+            case 'aircom': baseAttenuation100m100MHz = 3.8; break;
+        }
+
+        // Évolution proportionnelle à la racine carrée de la fréquence
+        const attenuationAtFreqPer100m = baseAttenuation100m100MHz * Math.sqrt(freqMHz / 100);
+        const totalLossDB = (attenuationAtFreqPer100m * lengthM) / 100;
+        const powerRatio = Math.pow(10, -totalLossDB / 10) * 100;
+        const powerW = Math.pow(10, -totalLossDB / 10) * power;
+
+        document.getElementById('rf-result').innerHTML = 
+		    `Pertes estimées : <strong>${totalLossDB.toFixed(2)} dB</strong> | Puissance transmise : <strong>${powerRatio.toFixed(1)} %</strong> | Puissance : ${powerW.toFixed(1)} W`;
+    }
+
+    // Initialisation au chargement
+    window.onload = function() {
+        calculateDC();
+        calculateRF();
+    };
+</script>
+
+</body>
+</html>

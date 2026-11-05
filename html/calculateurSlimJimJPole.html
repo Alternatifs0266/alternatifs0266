@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculateur Antenne Slim-Jim & J-Pole</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #38bdf8;
+            --accent-hover: #0284c7;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --wire-color: #f59e0b;
+            --cut-color: #ef4444;
+            --coax-color: #10b981;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: var(--accent);
+            margin-top: 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 850px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text-muted);
+            font-size: 0.9em;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background-color: #0f172a;
+            color: var(--text-main);
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .results {
+            margin-bottom: 15px;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.95em;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-value {
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .svg-container {
+            background-color: #0f172a;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            padding: 10px;
+            text-align: center;
+            margin-top: auto;
+        }
+
+        svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .note {
+            font-size: 0.85em;
+            color: var(--text-muted);
+            margin-top: 10px;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Calculateur Antenne Slim-Jim & J-Pole</h1>
+    <p style="text-align: center; color: var(--text-muted); margin-bottom: 25px;">
+        Dimensionnement précis avec schémas interactifs pour Twin-Lead 300/450 Ω, fil ou tube de cuivre.
+    </p>
+
+    <div class="card" style="margin-bottom: 20px;">
+        <h2>Paramètres de construction</h2>
+        <div class="grid">
+            <div class="form-group">
+                <label for="freq">Fréquence de travail (MHz)</label>
+                <input type="number" id="freq" value="162.025" step="0.001">
+            </div>
+            <div class="form-group">
+                <label for="material">Type de conducteur / Support</label>
+                <select id="material" onchange="updateVelocity()">
+                    <option value="0.82" selected>Twin-Lead 300 Ω standard (Méplat, VF ≈ 0.82)</option>
+                    <option value="0.91">Ligne échelle 450 Ω / Fenêtre (VF ≈ 0.91)</option>
+                    <option value="0.85">Twin-Lead isolé haute qualité (VF ≈ 0.85)</option>
+                    <option value="0.95">Fil de cuivre nu / Tube cuivre (VF ≈ 0.95)</option>
+                    <option value="custom">Facteur de vélocité personnalisé</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group" id="custom-vf-group" style="display: none;">
+            <label for="vf">Facteur de vélocité personnalisé (0.50 à 0.99)</label>
+            <input type="number" id="vf" value="0.82" step="0.01" min="0.5" max="0.99">
+        </div>
+    </div>
+
+    <div class="grid">
+        <!-- SLIM-JIM -->
+        <div class="card">
+            <h2>Antenne Slim-Jim</h2>
+            <div class="results">
+                <div class="result-item">
+                    <span>Longueur totale (A) :</span>
+                    <span class="result-value" id="sj-A">-</span>
+                </div>
+                <div class="result-item">
+                    <span>Brin rayonnant supérieur (B) :</span>
+                    <span class="result-value" id="sj-B">-</span>
+                </div>
+                <div class="result-item">
+                    <span>Espace / Encoche (D) :</span>
+                    <span class="result-value" id="sj-D">-</span>
+                </div>
+                <div class="result-item">
+                    <span>Adaptateur d'impédance (C) :</span>
+                    <span class="result-value" id="sj-C">-</span>
+                </div>
+                <div class="result-item">
+                    <span>Point d'alimentation 50 Ω (E) :</span>
+                    <span class="result-value" id="sj-E">-</span>
+                </div>
+            </div>
+
+            <div class="svg-container">
+                <svg viewBox="0 0 260 420" width="260" height="420">
+                    <rect x="90" y="30" width="40" height="340" fill="none" stroke="#334155" stroke-width="2" rx="4"/>
+                    <line x1="90" y1="30" x2="130" y2="30" stroke="var(--wire-color)" stroke-width="5" stroke-linecap="round"/>
+                    <line x1="90" y1="30" x2="90" y2="370" stroke="var(--wire-color)" stroke-width="4"/>
+                    <line x1="130" y1="30" x2="130" y2="170" stroke="var(--wire-color)" stroke-width="4"/>
+                    <line x1="130" y1="170" x2="130" y2="195" stroke="var(--cut-color)" stroke-width="2" stroke-dasharray="3,3"/>
+                    <text x="140" y="187" fill="var(--cut-color)" font-size="10" font-weight="bold">Encoche (D)</text>
+                    <line x1="130" y1="195" x2="130" y2="370" stroke="var(--wire-color)" stroke-width="4"/>
+                    <line x1="90" y1="370" x2="130" y2="370" stroke="var(--wire-color)" stroke-width="5" stroke-linecap="round"/>
+
+                    <path d="M 20 330 L 90 330" stroke="var(--coax-color)" stroke-width="3"/>
+                    <path d="M 20 335 L 130 335" stroke="var(--coax-color)" stroke-width="2" stroke-dasharray="2,2"/>
+                    <circle cx="90" cy="330" r="4" fill="var(--coax-color)"/>
+                    <circle cx="130" cy="335" r="4" fill="var(--coax-color)"/>
+                    <text x="15" y="325" fill="var(--coax-color)" font-size="10" font-weight="bold">Coax 50Ω</text>
+
+                    <line x1="70" y1="30" x2="70" y2="370" stroke="var(--accent)" stroke-width="1"/>
+                    <text x="65" y="200" fill="var(--accent)" font-size="11" text-anchor="end" font-weight="bold">A (Totale)</text>
+                    <line x1="150" y1="30" x2="150" y2="170" stroke="var(--accent)" stroke-width="1"/>
+                    <text x="155" y="100" fill="var(--accent)" font-size="10">B (3/4 λ)</text>
+                    <line x1="150" y1="195" x2="150" y2="370" stroke="var(--accent)" stroke-width="1"/>
+                    <text x="155" y="280" fill="var(--accent)" font-size="10">C (1/4 λ)</text>
+                    <line x1="50" y1="330" x2="50" y2="370" stroke="var(--coax-color)" stroke-width="1"/>
+                    <text x="45" y="355" fill="var(--coax-color)" font-size="10" text-anchor="end">E (Attaque)</text>
+                </svg>
+            </div>
+            <p class="note">
+                <strong>Instructions :</strong> Court-circuitez les deux fils en haut et en bas. Découpez une encoche (D) sur un seul côté. Soudez l'âme du coax sur le long brin et la tresse sur le côté encoche au point (E).
+            </p>
+        </div>
+
+        <!-- J-POLE -->
+        <div class="card">
+            <h2>Antenne J-Pole</h2>
+            <div class="results">
+                <div class="result-item">
+                    <span>Grand brin / Total (A) :</span>
+                    <span class="result-value" id="jp-A">-</span>
+                </div>
+                <div class="result-item">
+                    <span>Petit brin / Stub (B) :</span>
+                    <span class="result-value" id="jp-B">-</span>
+                </div>
+                <div class="result-item">
+                    <span>Point d'alimentation 50 Ω (C) :</span>
+                    <span class="result-value" id="jp-C">-</span>
+                </div>
+                <div class="result-item">
+                    <span>Écartement des brins (D) :</span>
+                    <span class="result-value" id="jp-D">-</span>
+                </div>
+            </div>
+
+            <div class="svg-container">
+                <svg viewBox="0 0 260 420" width="260" height="420">
+                    <line x1="90" y1="30" x2="90" y2="370" stroke="var(--wire-color)" stroke-width="5" stroke-linecap="round"/>
+                    <line x1="140" y1="250" x2="140" y2="370" stroke="var(--wire-color)" stroke-width="5" stroke-linecap="round"/>
+                    <line x1="90" y1="370" x2="140" y2="370" stroke="var(--wire-color)" stroke-width="6"/>
+
+                    <path d="M 20 330 L 90 330" stroke="var(--coax-color)" stroke-width="3"/>
+                    <path d="M 20 335 L 140 335" stroke="var(--coax-color)" stroke-width="2" stroke-dasharray="2,2"/>
+                    <circle cx="90" cy="330" r="4" fill="var(--coax-color)"/>
+                    <circle cx="140" cy="335" r="4" fill="var(--coax-color)"/>
+                    <text x="15" y="325" fill="var(--coax-color)" font-size="10" font-weight="bold">Coax 50Ω</text>
+
+                    <line x1="70" y1="30" x2="70" y2="370" stroke="var(--accent)" stroke-width="1"/>
+                    <text x="65" y="200" fill="var(--accent)" font-size="11" text-anchor="end" font-weight="bold">A (Grand brin)</text>
+                    <line x1="160" y1="250" x2="160" y2="370" stroke="var(--accent)" stroke-width="1"/>
+                    <text x="165" y="310" fill="var(--accent)" font-size="10">B (Stub 1/4 λ)</text>
+                    <line x1="50" y1="330" x2="50" y2="370" stroke="var(--coax-color)" stroke-width="1"/>
+                    <text x="45" y="355" fill="var(--coax-color)" font-size="10" text-anchor="end">C (Attaque)</text>
+                    <line x1="90" y1="390" x2="140" y2="390" stroke="var(--accent)" stroke-width="1"/>
+                    <text x="115" y="405" fill="var(--accent)" font-size="10" text-anchor="middle">D (Écartement)</text>
+                </svg>
+            </div>
+            <p class="note">
+                <strong>Instructions :</strong> L'âme du câble coaxial s'attache sur le brin long (A) et la tresse sur le brin court (B). Ajustez la hauteur du point d'attache (C) pour optimiser le TOS.
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateVelocity() {
+        const matSelect = document.getElementById('material');
+        const customVfGroup = document.getElementById('custom-vf-group');
+        const vfInput = document.getElementById('vf');
+
+        if (matSelect.value === 'custom') {
+            customVfGroup.style.display = 'block';
+        } else {
+            customVfGroup.style.display = 'none';
+            vfInput.value = matSelect.value;
+        }
+        calculate();
+    }
+
+    function calculate() {
+        const freq = parseFloat(document.getElementById('freq').value);
+        const vf = parseFloat(document.getElementById('vf').value);
+
+        if (!freq || freq <= 0 || !vf || vf <= 0) return;
+
+        const c = 299792458;
+        const lambdaFree = c / (freq * 1e6);
+        const lambdaMod = lambdaFree * vf;
+
+        const sj_A = (lambdaMod * 0.75) * 100;
+        const sj_B = (lambdaMod * 0.50) * 100;
+        const sj_C = (lambdaMod * 0.25) * 100;
+        const sj_D = Math.max(2.0, (lambdaFree * 0.02) * 100);
+        const sj_E = (lambdaMod * 0.025) * 100;
+
+        const jp_A = (lambdaMod * 0.75) * 100;
+        const jp_B = (lambdaMod * 0.25) * 100;
+        const jp_C = (lambdaMod * 0.025) * 100;
+        const jp_D = (lambdaFree * 0.02) * 100;
+
+        document.getElementById('sj-A').textContent = sj_A.toFixed(1) + " cm";
+        document.getElementById('sj-B').textContent = sj_B.toFixed(1) + " cm";
+        document.getElementById('sj-C').textContent = sj_C.toFixed(1) + " cm";
+        document.getElementById('sj-D').textContent = sj_D.toFixed(1) + " cm";
+        document.getElementById('sj-E').textContent = sj_E.toFixed(1) + " cm";
+
+        document.getElementById('jp-A').textContent = jp_A.toFixed(1) + " cm";
+        document.getElementById('jp-B').textContent = jp_B.toFixed(1) + " cm";
+        document.getElementById('jp-C').textContent = jp_C.toFixed(1) + " cm";
+        document.getElementById('jp-D').textContent = jp_D.toFixed(1) + " cm";
+    }
+
+    document.getElementById('freq').addEventListener('input', calculate);
+    document.getElementById('vf').addEventListener('input', calculate);
+
+    calculate();
+</script>
+
+</body>
+</html>

@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
     <meta charset="UTF-8">
 	<meta name="description" content="Aperçu temps réel de mon système solaire personnel sur serveur Ubuntu.">
 
@@ -10,11 +13,13 @@
 	<meta property="og:description" content="Un système solaire en 3D avec positions réelles, tournant sur Apache.">
 	<meta property="og:image" content="https://14alt266.freeboxos.fr/rendu.png">
 
-	<meta property="twitter:card" content="summary_large_image">
-	<meta property="twitter:url" content="https://14alt266.freeboxos.fr/">
-	<meta property="twitter:title" content="Alternatifs World's">
-	<meta property="twitter:description" content="Un système solaire en 3D avec positions réelles, tournant sur Apache.">
-	<meta property="twitter:image" content="https://14alt266.freeboxos.fr/rendu.png">
+	<meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@alternatifs0266"/>
+    <meta name="twitter:creator" content="@alternatifs0266"/>
+	<meta name="twitter:url" content="https://14alt266.freeboxos.fr/">
+	<meta name="twitter:title" content="Alternatifs World's">
+	<meta name="twitter:description" content="Un système solaire en 3D avec positions réelles, tournant sur Apache.">
+	<meta name="twitter:image" content="https://14alt266.freeboxos.fr/rendu.png">
 
 	<meta name="theme-color" content="#08060a">
     <title>Alternatifs World's</title>
@@ -38,14 +43,14 @@
     const startTime = Date.now();
 
     const planets = [
-        { name: "Mercure", dist: 50,  size: 2.8, color: "#A5A5A5", period: 88,    long0: 252 },
-        { name: "Vénus",   dist: 80,  size: 4.8, color: "#E3BB76", period: 224,   long0: 181 },
-        { name: "Terre",   dist: 110, size: 5.2, color: "#2271B1", period: 365,   long0: 100 },
-        { name: "Mars",    dist: 145, size: 3.8, color: "#C1440E", period: 687,   long0: 355 },
-        { name: "Jupiter", dist: 210, size: 11,  color: "#D8CA9D", period: 4331,  long0: 34  },
-        { name: "Saturne", dist: 275, size: 9.5, color: "#F2D399", period: 10747, long0: 50  },
-        { name: "Uranus",  dist: 330, size: 7.5, color: "#ACE5EE", period: 30589, long0: 313 },
-        { name: "Neptune", dist: 380, size: 7,   color: "#4B70DD", period: 60189, long0: 304 }
+        { name: "Mercure", dist: 50,  size: 2.8, color: "#A5A5A5", period: 88,    long0: 252, url: "https://14alt266.freeboxos.fr/adsbx/" },
+        { name: "Vénus",   dist: 80,  size: 4.8, color: "#E3BB76", period: 224,   long0: 181, url: "https://14alt266.freeboxos.fr/graphs1090/" },
+        { name: "Terre",   dist: 110, size: 5.2, color: "#2271B1", period: 365,   long0: 100, url: "https://14alt266.freeboxos.fr/openwebrx/" },
+        { name: "Mars",    dist: 145, size: 3.8, color: "#C1440E", period: 687,   long0: 355, url: "https://14alt266.freeboxos.fr/calculateurPertesDCRF.html" },
+        { name: "Jupiter", dist: 210, size: 11,  color: "#D8CA9D", period: 4331,  long0: 34,  url: "https://14alt266.freeboxos.fr/calculateurSlimJimJPole.html" },
+        { name: "Saturne", dist: 275, size: 9.5, color: "#F2D399", period: 10747, long0: 50,  url: "https://14alt266.freeboxos.fr/calculateurSeptum.html" },
+        { name: "Uranus",  dist: 330, size: 7.5, color: "#ACE5EE", period: 30589, long0: 313, url: "https://14alt266.freeboxos.fr/calculateurGP.html" },
+        { name: "Neptune", dist: 380, size: 7,   color: "#4B70DD", period: 60189, long0: 304, url: "https://fr.wikipedia.org/wiki/Neptune_(plan%C3%A8te)" }
     ];
 
     function init() {
@@ -55,7 +60,7 @@
         for (let i = 0; i < 45; i++) {
             nebulaClouds.push({
                 x: Math.random() * width, y: Math.random() * height,
-                size: Math.random() * (width * 0.8) + (width * 0.2), 
+                size: Math.random() * (width * 0.8) + (width * 0.2),
                 opacity: Math.random() * 0.04 + 0.01,
                 color: Math.random() > 0.5 ? 'rgba(80, 30, 10, 0.03)' : 'rgba(50, 10, 40, 0.02)',
                 pulse: Math.random() * 0.0003 + 0.0001,
@@ -75,12 +80,10 @@
             ctx.fillStyle = sunG;
             ctx.beginPath(); ctx.arc(x, y, radius * 2, 0, Math.PI * 2); ctx.fill();
         }
-        
-        // Base de la planète
+
         ctx.fillStyle = color;
         ctx.beginPath(); ctx.arc(x, y, radius, 0, Math.PI * 2); ctx.fill();
 
-        // Ombrage 3D (Highlight vers le Soleil au centre)
         const grad = ctx.createRadialGradient(x - radius * 0.3, y - radius * 0.3, 0, x, y, radius);
         grad.addColorStop(0, 'rgba(255, 255, 255, 0.3)');
         grad.addColorStop(0.6, 'rgba(0, 0, 0, 0)');
@@ -122,7 +125,7 @@
         planets.forEach(p => {
             ctx.save();
             ctx.translate(cx, cy);
-            ctx.rotate(rotationPlan); // Inclinaison horizontale
+            ctx.rotate(rotationPlan);
 
             // Dessin Orbite
             ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
@@ -133,18 +136,73 @@
             let rawX = Math.cos(angle) * p.dist;
             let rawY = Math.sin(angle) * p.dist * tilt;
 
-            // Dessin Planète (en annulant la rotation pour que la sphère ne soit pas déformée)
-            ctx.rotate(-rotationPlan); 
-            // On recalcule x et y après rotation du plan pour dessiner la sphère droite
+            ctx.rotate(-rotationPlan);
             let finalX = rawX * Math.cos(rotationPlan) - rawY * Math.sin(rotationPlan);
             let finalY = rawX * Math.sin(rotationPlan) + rawY * Math.cos(rotationPlan);
-            
+
+            const screenX = cx + finalX;
+            const screenY = cy + finalY;
+
+            p.currentX = screenX;
+            p.currentY = screenY;
+
+            // 1. Dessiner la sphère de la planète
             drawSphere(finalX, finalY, p.size, p.color);
+
+            // 2. Dessiner le nom de la planète juste au-dessus
+            ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
+            ctx.font = "11px sans-serif";
+            ctx.textAlign = "center";
+
+            // Ombre du texte pour contrer la luminosité de la nébuleuse
+            ctx.shadowColor = "black";
+            ctx.shadowBlur = 4;
+
+            // Position du texte (décalé vers le haut selon la taille de la planète)
+            ctx.fillText(p.name, finalX, finalY - (p.size + 6));
+
             ctx.restore();
         });
 
         requestAnimationFrame(draw);
     }
+
+    // --- INTERACTIVITÉ ---
+    function getPlanetAtPosition(mouseX, mouseY) {
+        const clickTolerance = 4;
+        for (let i = planets.length - 1; i >= 0; i--) {
+            const p = planets[i];
+            if (p.currentX !== undefined && p.currentY !== undefined) {
+                const dist = Math.hypot(mouseX - p.currentX, mouseY - p.currentY);
+                if (dist <= p.size + clickTolerance) {
+                    return p;
+                }
+            }
+        }
+        return null;
+    }
+
+    canvas.addEventListener('click', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        const clickedPlanet = getPlanetAtPosition(mouseX, mouseY);
+        if (clickedPlanet && clickedPlanet.url) {
+            window.location.href = clickedPlanet.url;
+        }
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        const hoveredPlanet = getPlanetAtPosition(mouseX, mouseY);
+        if (hoveredPlanet) {
+            canvas.style.cursor = 'pointer';
+        } else {
+            canvas.style.cursor = 'default';
+        }
+    });
 
     window.addEventListener('resize', init);
     init(); draw();
