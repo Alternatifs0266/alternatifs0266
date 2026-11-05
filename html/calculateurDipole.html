@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculateur d'Antenne Dipôle 1/2 λ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        dipole: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            900: '#1e3a8a',
+                            dark: '#0b0f17',
+                            card: '#131926',
+                            border: '#232d42',
+                            accent: '#38bdf8',
+                            amber: '#f59e0b',
+                            purple: '#a855f7'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0b0f17;
+            color: #c9d1d9;
+        }
+        .glow-accent {
+            box-shadow: 0 0 25px rgba(56, 189, 248, 0.12);
+        }
+        .glow-blue {
+            box-shadow: 0 0 25px rgba(59, 130, 246, 0.15);
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #38bdf8;
+            cursor: pointer;
+            border: 2px solid #0b0f17;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased min-h-screen pb-12">
+
+    <!-- En-tête -->
+    <header class="border-b border-dipole-border bg-dipole-card/90 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2.5 bg-dipole-accent/10 border border-dipole-accent/30 rounded-xl text-dipole-accent">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-white tracking-wide flex items-center gap-2">
+                        RF-Calc <span class="text-xs px-2 py-0.5 rounded bg-dipole-accent/20 text-dipole-accent font-mono border border-dipole-accent/30">Dipôle 1/2 λ</span>
+                    </h1>
+                    <p class="text-xs text-gray-400">Calculateur d'antenne Dipôle alimentée au centre & Schématique SVG</p>
+                </div>
+            </div>
+            <!-- Boutons de préréglages fréquences -->
+            <div class="flex flex-wrap items-center justify-center gap-2">
+                <button onclick="presetFrequency(1090)" class="text-xs px-2.5 py-1.5 rounded-lg bg-dipole-border hover:bg-gray-700 text-gray-200 transition font-mono border border-gray-600">
+                    ADS-B (1090 MHz)
+                </button>
+                <button onclick="presetFrequency(433.92)" class="text-xs px-2.5 py-1.5 rounded-lg bg-dipole-border hover:bg-gray-700 text-gray-200 transition font-mono border border-gray-600">
+                    70cm / LPD (433.92)
+                </button>
+                <button onclick="presetFrequency(156.8)" class="text-xs px-2.5 py-1.5 rounded-lg bg-dipole-border hover:bg-gray-700 text-gray-200 transition font-mono border border-gray-600">
+                    VHF Marine (156.8)
+                </button>
+                <button onclick="presetFrequency(144)" class="text-xs px-2.5 py-1.5 rounded-lg bg-dipole-border hover:bg-gray-700 text-gray-200 transition font-mono border border-gray-600">
+                    2m Ham (144)
+                </button>
+                <button onclick="presetFrequency(28.5)" class="text-xs px-2.5 py-1.5 rounded-lg bg-dipole-border hover:bg-gray-700 text-gray-200 transition font-mono border border-gray-600">
+                    10m HF (28.5)
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenu Principal -->
+    <main class="max-w-6xl mx-auto px-4 mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+        <!-- Colonne Gauche : Formulaire & Paramètres (5 cols) -->
+        <section class="lg:col-span-5 space-y-6">
+            
+            <div class="bg-dipole-card border border-dipole-border rounded-2xl p-6 glow-accent">
+                <h2 class="text-lg font-semibold text-white mb-5 flex items-center gap-2 border-b border-dipole-border pb-3">
+                    <svg class="w-5 h-5 text-dipole-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                    </svg>
+                    Paramètres de Fréquence & Conducteur
+                </h2>
+
+                <div class="space-y-5">
+                    <!-- Fréquence -->
+                    <div>
+                        <div class="flex justify-between items-center mb-1.5">
+                            <label for="frequency" class="text-sm font-medium text-gray-200">Fréquence cible (MHz)</label>
+                            <span class="text-xs text-dipole-accent font-mono" id="freqDisplay">1090.00 MHz</span>
+                        </div>
+                        <div class="relative">
+                            <input type="number" id="frequency" value="1090" step="0.01" min="1" max="6000" 
+                                class="w-full bg-dipole-dark border border-dipole-border rounded-xl px-4 py-2.5 text-white font-mono focus:outline-none focus:border-dipole-accent text-lg">
+                            <div class="absolute right-3 top-2.5 text-sm text-gray-500 font-mono">MHz</div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Entrez la fréquence de résonance souhaitée.</p>
+                    </div>
+
+                    <!-- Facteur de Vélocité (VF) -->
+                    <div>
+                        <div class="flex justify-between items-center mb-1.5">
+                            <label for="velocityFactor" class="text-sm font-medium text-gray-200">Facteur de Vélocité ($k$ ou VF)</label>
+                            <span class="text-xs text-dipole-amber font-mono" id="vfDisplay">0.95</span>
+                        </div>
+                        <div class="flex gap-3">
+                            <input type="number" id="velocityFactor" value="0.95" step="0.01" min="0.50" max="1.00"
+                                class="w-28 bg-dipole-dark border border-dipole-border rounded-xl px-3 py-2 text-white font-mono focus:outline-none focus:border-dipole-accent text-center">
+                            <select id="vfPresets" class="flex-1 bg-dipole-dark border border-dipole-border rounded-xl px-3 py-2 text-sm text-gray-300 focus:outline-none focus:border-dipole-accent">
+                                <option value="0.95" selected>Tige Cuivre / Laiton dénudé (0.95)</option>
+                                <option value="0.97">Tige Alum. / Tube mince (0.97)</option>
+                                <option value="0.92">Fil Cuivre isolé PVC (0.92)</option>
+                                <option value="0.98">Fil très fin / Dans le vide (0.98)</option>
+                            </select>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Prend en compte le diamètre du conducteur et l'effet d'extrémité.</p>
+                    </div>
+
+                    <!-- Polarisation -->
+                    <div>
+                        <label class="text-sm font-medium text-gray-200 block mb-2">Polarisation de l'antenne</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <label class="cursor-pointer border border-dipole-border rounded-xl p-3 bg-dipole-dark flex items-center gap-3 hover:border-gray-500 transition has-[:checked]:border-dipole-accent has-[:checked]:bg-dipole-accent/10">
+                                <input type="radio" name="polarization" value="vertical" checked class="accent-dipole-accent" onchange="switchPolarization('vertical')">
+                                <div>
+                                    <div class="text-sm font-semibold text-white">Verticale</div>
+                                    <div class="text-xs text-dipole-accent font-mono">ADS-B, VHF, LPD</div>
+                                </div>
+                            </label>
+                            <label class="cursor-pointer border border-dipole-border rounded-xl p-3 bg-dipole-dark flex items-center gap-3 hover:border-gray-500 transition has-[:checked]:border-dipole-accent has-[:checked]:bg-dipole-accent/10">
+                                <input type="radio" name="polarization" value="horizontal" class="accent-dipole-accent" onchange="switchPolarization('horizontal')">
+                                <div>
+                                    <div class="text-sm font-semibold text-white">Horizontale</div>
+                                    <div class="text-xs text-dipole-purple font-mono">HF, Decamétrique</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Carte Récapitulative des Valeurs -->
+            <div class="bg-dipole-card border border-dipole-border rounded-2xl p-6 glow-blue">
+                <div class="flex justify-between items-center mb-4 border-b border-dipole-border pb-3">
+                    <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+                        <svg class="w-5 h-5 text-dipole-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m-6 4h6m-6 4h6M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        Dimensions Calculées
+                    </h2>
+                    <button onclick="copyResults()" class="text-xs px-2.5 py-1 bg-dipole-dark border border-dipole-border hover:bg-gray-800 text-gray-300 rounded-lg flex items-center gap-1 transition">
+                        <svg class="w-3.5 h-3.5 text-dipole-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+                        </svg>
+                        <span id="copyBtnText">Copier</span>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- Longueur Totale du Dipôle (L) -->
+                    <div class="col-span-2 bg-dipole-dark border border-dipole-500/40 rounded-xl p-4">
+                        <div class="text-xs text-dipole-500 font-semibold uppercase tracking-wider mb-1">Longueur Totale du Dipôle (L = λ/2 × VF)</div>
+                        <div class="text-3xl font-bold text-white font-mono" id="totalLenCm">0.00 <span class="text-base text-gray-400 font-sans">cm</span></div>
+                        <div class="text-xs text-gray-400 font-mono mt-1" id="totalLenM">0.000 m / 0.0 mm</div>
+                    </div>
+
+                    <!-- Brin A (Âme Coaxial) -->
+                    <div class="bg-dipole-dark border border-dipole-accent/30 rounded-xl p-3.5">
+                        <div class="text-xs text-dipole-accent font-semibold uppercase tracking-wider mb-1">Brin A (Âme)</div>
+                        <div class="text-xl font-bold text-white font-mono" id="elemACm">0.00 <span class="text-xs text-gray-400 font-sans">cm</span></div>
+                        <div class="text-xs text-gray-400 font-mono mt-0.5" id="elemAMm">0.0 mm</div>
+                    </div>
+
+                    <!-- Brin B (Masse Coaxial) -->
+                    <div class="bg-dipole-dark border border-dipole-purple/30 rounded-xl p-3.5">
+                        <div class="text-xs text-dipole-purple font-semibold uppercase tracking-wider mb-1">Brin B (Masse)</div>
+                        <div class="text-xl font-bold text-white font-mono" id="elemBCm">0.00 <span class="text-xs text-gray-400 font-sans">cm</span></div>
+                        <div class="text-xs text-gray-400 font-mono mt-0.5" id="elemBMm">0.0 mm</div>
+                    </div>
+
+                    <!-- Longueur d'onde complète -->
+                    <div class="bg-dipole-dark border border-dipole-border rounded-xl p-3">
+                        <div class="text-xs text-gray-400">Longueur d'onde (λ)</div>
+                        <div class="text-base font-semibold text-gray-200 font-mono" id="lambdaVal">0.00 cm</div>
+                    </div>
+
+                    <!-- Impédance & Gain -->
+                    <div class="bg-dipole-dark border border-dipole-border rounded-xl p-3">
+                        <div class="text-xs text-gray-400">Impédance / Gain</div>
+                        <div class="text-base font-semibold text-dipole-amber font-mono">~73 Ω / 2.15 dBi</div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Colonne Droite : Schéma SVG Interactif -->
+        <section class="lg:col-span-7 space-y-6">
+
+            <div class="bg-dipole-card border border-dipole-border rounded-2xl p-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-dipole-border pb-3 mb-4">
+                    <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+                        <svg class="w-5 h-5 text-dipole-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        Schéma Technique du Dipôle
+                    </h2>
+                    <span id="polBadge" class="px-2.5 py-1 text-xs rounded-lg bg-dipole-accent/20 text-dipole-accent font-mono border border-dipole-accent/30 self-start sm:self-auto">
+                        Polarisation Verticale
+                    </span>
+                </div>
+
+                <!-- Zone de dessin SVG -->
+                <div class="relative bg-dipole-dark border border-dipole-border rounded-xl p-4 flex items-center justify-center min-h-[420px]">
+                    
+                    <svg id="svgDipole" viewBox="0 0 500 440" class="w-full h-auto max-h-[440px] transition-all duration-300">
+                        <defs>
+                            <pattern id="gridDipole" width="20" height="20" patternUnits="userSpaceOnUse">
+                                <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#192233" stroke-width="1"/>
+                            </pattern>
+                            <linearGradient id="elemAGrad" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stop-color="#38bdf8"/>
+                                <stop offset="100%" stop-color="#0284c7"/>
+                            </linearGradient>
+                            <linearGradient id="elemBGrad" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stop-color="#c084fc"/>
+                                <stop offset="100%" stop-color="#7e22ce"/>
+                            </linearGradient>
+                        </defs>
+
+                        <!-- Fond -->
+                        <rect width="500" height="440" fill="url(#gridDipole)" rx="8" />
+
+                        <!-- Groupe complet du dipôle (permet la rotation dynamique V/H) -->
+                        <g id="dipoleMainGroup">
+                            
+                            <!-- Centre : Balun / Central Insulator Box -->
+                            <rect x="236" y="206" width="28" height="28" fill="#1f2937" stroke="#6b7280" stroke-width="2" rx="4"/>
+                            <circle cx="250" cy="220" r="4" fill="#f59e0b"/>
+
+                            <!-- Brin A (Haut / Droit) -->
+                            <line id="lineElemA" x1="250" y1="206" x2="250" y2="50" stroke="url(#elemAGrad)" stroke-width="6" stroke-linecap="round"/>
+
+                            <!-- Brin B (Bas / Gauche) -->
+                            <line id="lineElemB" x1="250" y1="234" x2="250" y2="390" stroke="url(#elemBGrad)" stroke-width="6" stroke-linecap="round"/>
+
+                            <!-- Câble Coaxial d'alimentation (Perpendiculaire) -->
+                            <g id="coaxCableGroup">
+                                <path id="coaxPath" d="M 236 220 L 160 220" stroke="#374151" stroke-width="6" stroke-linecap="round"/>
+                                <path id="coaxPathInner" d="M 236 220 L 160 220" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/>
+                                <text id="coaxLabel" x="145" y="224" font-family="JetBrains Mono" font-size="10" fill="#9ca3af" text-anchor="end">Coaxial 50 Ω / Balun 1:1</text>
+                            </g>
+
+                            <!-- Cote Brin A -->
+                            <g id="dimAGroup">
+                                <line id="dimALine" x1="275" y1="206" x2="275" y2="50" stroke="#38bdf8" stroke-width="1" stroke-dasharray="3,3"/>
+                                <line id="dimATop" x1="270" y1="50" x2="280" y2="50" stroke="#38bdf8" stroke-width="1"/>
+                                <line id="dimABot" x1="270" y1="206" x2="280" y2="206" stroke="#38bdf8" stroke-width="1"/>
+                                <text id="labelElemA" x="290" y="133" font-family="JetBrains Mono" font-size="12" fill="#38bdf8" font-weight="bold">A = -- cm</text>
+                            </g>
+
+                            <!-- Cote Brin B -->
+                            <g id="dimBGroup">
+                                <line id="dimBLine" x1="275" y1="234" x2="275" y2="390" stroke="#c084fc" stroke-width="1" stroke-dasharray="3,3"/>
+                                <line id="dimBTop" x1="270" y1="234" x2="280" y2="234" stroke="#c084fc" stroke-width="1"/>
+                                <line id="dimBBot" x1="270" y1="390" x2="280" y2="390" stroke="#c084fc" stroke-width="1"/>
+                                <text id="labelElemB" x="290" y="317" font-family="JetBrains Mono" font-size="12" fill="#c084fc" font-weight="bold">B = -- cm</text>
+                            </g>
+
+                            <!-- Cote Longueur Totale L -->
+                            <g id="dimTotalGroup">
+                                <line id="dimTotLine" x1="210" y1="50" x2="210" y2="390" stroke="#3b82f6" stroke-width="1" stroke-dasharray="4,4"/>
+                                <line id="dimTotTop" x1="205" y1="50" x2="215" y2="50" stroke="#3b82f6" stroke-width="1"/>
+                                <line id="dimTotBot" x1="205" y1="390" x2="215" y2="390" stroke="#3b82f6" stroke-width="1"/>
+                                <text id="labelTotalL" x="195" y="225" font-family="JetBrains Mono" font-size="13" fill="#3b82f6" font-weight="bold" text-anchor="end">L (Total) = -- cm</text>
+                            </g>
+                        </g>
+
+                        <!-- Légende simplifiée -->
+                        <text x="15" y="25" font-family="Inter" font-size="12" fill="#e5e7eb" font-weight="600">Dipôle demi-onde alimenté au centre (Symétrique)</text>
+                        <text x="15" y="42" font-family="Inter" font-size="10" fill="#9ca3af">Alimentation 50 Ω par câble coaxial perpendiculaire</text>
+                    </svg>
+
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Section Conseils Techniques & Balun -->
+    <footer class="max-w-6xl mx-auto px-4 mt-12">
+        <div class="bg-dipole-card border border-dipole-border rounded-2xl p-6 lg:p-8 space-y-6">
+            <h3 class="text-xl font-bold text-white flex items-center gap-2 border-b border-dipole-border pb-4">
+                <svg class="w-6 h-6 text-dipole-amber" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Conseils Pratiques de Fabrication & Symétriseur (Balun)
+            </h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+                <div class="bg-dipole-dark border border-dipole-border rounded-xl p-4 space-y-2">
+                    <div class="font-semibold text-dipole-accent flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-full bg-dipole-accent/20 text-dipole-accent flex items-center justify-center text-xs">1</span>
+                        Polarisation & Orientation
+                    </div>
+                    <p class="text-gray-400 text-xs leading-relaxed">
+                        • <strong>Verticale :</strong> Obligatoire pour l'ADS-B (1090 MHz), le VHF Marine et les relais radioamateurs (omnidirectionnel).<br>
+                        • <strong>Horizontale :</strong> Préférée en HF / Décamétrique (28 MHz, etc.) pour limiter le bruit terrestre et favoriser la longue distance (DX).
+                    </p>
+                </div>
+
+                <div class="bg-dipole-dark border border-dipole-border rounded-xl p-4 space-y-2">
+                    <div class="font-semibold text-dipole-purple flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-full bg-dipole-purple/20 text-dipole-purple flex items-center justify-center text-xs">2</span>
+                        Pourquoi un Balun 1:1 ?
+                    </div>
+                    <p class="text-gray-400 text-xs leading-relaxed">
+                        Le dipôle est une antenne **symétrique** (Balanced) alors que le câble coaxial est **dissymétrique** (Unbalanced). Sans Balun 1:1 au centre, la gaine du coaxial peut rayonner, créant des parasites et déformant le diagramme de rayonnement. Un Choke Balun (quelques tours de câble coaxial sur ferrite) résout ce problème.
+                    </p>
+                </div>
+
+                <div class="bg-dipole-dark border border-dipole-border rounded-xl p-4 space-y-2">
+                    <div class="font-semibold text-dipole-amber flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-full bg-dipole-amber/20 text-dipole-amber flex items-center justify-center text-xs">3</span>
+                        Impédance (~73 Ω vs 50 Ω)
+                    </div>
+                    <p class="text-gray-400 text-xs leading-relaxed">
+                        Un dipôle demi-onde isolé dans l'espace a une impédance de **73 Ω**, ce qui offre un ROS/SWR très faible ($\approx 1.4:1$) sur un câble coaxial 50 Ω. En rapprochant l'antenne du sol ou d'un mât métallique, son impédance descend naturellement vers **50 Ω**.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Formules mathématiques -->
+            <div class="p-4 bg-dipole-dark/60 rounded-xl border border-dipole-border/50 text-xs text-gray-400 font-mono flex flex-wrap justify-between gap-4">
+                <div><strong>Longueur Totale L :</strong> L = (299792458 / (F_MHz * 10^6) / 2) * VF</div>
+                <div><strong>Chaque brin (A et B) :</strong> A = B = L / 2</div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Logic JavaScript -->
+    <script>
+        // Variables globales
+        let currentPolarization = 'vertical';
+
+        // Éléments du DOM
+        const freqInput = document.getElementById('frequency');
+        const vfInput = document.getElementById('velocityFactor');
+        const vfPresets = document.getElementById('vfPresets');
+        const freqDisplay = document.getElementById('freqDisplay');
+        const vfDisplay = document.getElementById('vfDisplay');
+
+        // Affichage des résultats
+        const totalLenCmEl = document.getElementById('totalLenCm');
+        const totalLenMEl = document.getElementById('totalLenM');
+        const elemACmEl = document.getElementById('elemACm');
+        const elemAMmEl = document.getElementById('elemAMm');
+        const elemBCmEl = document.getElementById('elemBCm');
+        const elemBMmEl = document.getElementById('elemBMm');
+        const lambdaValEl = document.getElementById('lambdaVal');
+
+        // SVG elements
+        const polBadge = document.getElementById('polBadge');
+        const labelElemA = document.getElementById('labelElemA');
+        const labelElemB = document.getElementById('labelElemB');
+        const labelTotalL = document.getElementById('labelTotalL');
+
+        // Dynamic listeners
+        vfPresets.addEventListener('change', (e) => {
+            vfInput.value = e.target.value;
+            calculateDipole();
+        });
+
+        vfInput.addEventListener('input', () => {
+            vfPresets.value = "custom";
+            calculateDipole();
+        });
+
+        freqInput.addEventListener('input', calculateDipole);
+
+        function presetFrequency(freq) {
+            freqInput.value = freq;
+            calculateDipole();
+        }
+
+        function switchPolarization(pol) {
+            currentPolarization = pol;
+            const svgDipole = document.getElementById('svgDipole');
+            const coaxCableGroup = document.getElementById('coaxCableGroup');
+
+            if (pol === 'horizontal') {
+                polBadge.textContent = "Polarisation Horizontale";
+                polBadge.className = "px-2.5 py-1 text-xs rounded-lg bg-dipole-purple/20 text-dipole-purple font-mono border border-dipole-purple/30 self-start sm:self-auto";
+                
+                // Transposer visuellement les lignes et textes pour une vue horizontale
+                updateSVGHorizontal();
+            } else {
+                polBadge.textContent = "Polarisation Verticale";
+                polBadge.className = "px-2.5 py-1 text-xs rounded-lg bg-dipole-accent/20 text-dipole-accent font-mono border border-dipole-accent/30 self-start sm:self-auto";
+                
+                updateSVGVertical();
+            }
+            calculateDipole();
+        }
+
+        function updateSVGVertical() {
+            // Lignes verticales
+            document.getElementById('lineElemA').setAttribute('x1', '250');
+            document.getElementById('lineElemA').setAttribute('y1', '206');
+            document.getElementById('lineElemA').setAttribute('x2', '250');
+            document.getElementById('lineElemA').setAttribute('y2', '50');
+
+            document.getElementById('lineElemB').setAttribute('x1', '250');
+            document.getElementById('lineElemB').setAttribute('y1', '234');
+            document.getElementById('lineElemB').setAttribute('x2', '250');
+            document.getElementById('lineElemB').setAttribute('y2', '390');
+
+            // Coaxial sort par la gauche
+            document.getElementById('coaxPath').setAttribute('d', 'M 236 220 L 140 220');
+            document.getElementById('coaxPathInner').setAttribute('d', 'M 236 220 L 140 220');
+            document.getElementById('coaxLabel').setAttribute('x', '125');
+            document.getElementById('coaxLabel').setAttribute('y', '224');
+            document.getElementById('coaxLabel').setAttribute('text-anchor', 'end');
+
+            // Cote A
+            document.getElementById('dimALine').setAttribute('x1', '275');
+            document.getElementById('dimALine').setAttribute('y1', '206');
+            document.getElementById('dimALine').setAttribute('x2', '275');
+            document.getElementById('dimALine').setAttribute('y2', '50');
+            document.getElementById('dimATop').setAttribute('x1', '270'); document.getElementById('dimATop').setAttribute('y1', '50'); document.getElementById('dimATop').setAttribute('x2', '280'); document.getElementById('dimATop').setAttribute('y2', '50');
+            document.getElementById('dimABot').setAttribute('x1', '270'); document.getElementById('dimABot').setAttribute('y1', '206'); document.getElementById('dimABot').setAttribute('x2', '280'); document.getElementById('dimABot').setAttribute('y2', '206');
+            labelElemA.setAttribute('x', '290'); labelElemA.setAttribute('y', '133'); labelElemA.setAttribute('text-anchor', 'start');
+
+            // Cote B
+            document.getElementById('dimBLine').setAttribute('x1', '275');
+            document.getElementById('dimBLine').setAttribute('y1', '234');
+            document.getElementById('dimBLine').setAttribute('x2', '275');
+            document.getElementById('dimBLine').setAttribute('y2', '390');
+            document.getElementById('dimBTop').setAttribute('x1', '270'); document.getElementById('dimBTop').setAttribute('y1', '234'); document.getElementById('dimBTop').setAttribute('x2', '280'); document.getElementById('dimBTop').setAttribute('y2', '234');
+            document.getElementById('dimBBot').setAttribute('x1', '270'); document.getElementById('dimBBot').setAttribute('y1', '390'); document.getElementById('dimBBot').setAttribute('x2', '280'); document.getElementById('dimBBot').setAttribute('y2', '390');
+            labelElemB.setAttribute('x', '290'); labelElemB.setAttribute('y', '317'); labelElemB.setAttribute('text-anchor', 'start');
+
+            // Cote Total
+            document.getElementById('dimTotLine').setAttribute('x1', '210');
+            document.getElementById('dimTotLine').setAttribute('y1', '50');
+            document.getElementById('dimTotLine').setAttribute('x2', '210');
+            document.getElementById('dimTotLine').setAttribute('y2', '390');
+            document.getElementById('dimTotTop').setAttribute('x1', '205'); document.getElementById('dimTotTop').setAttribute('y1', '50'); document.getElementById('dimTotTop').setAttribute('x2', '215'); document.getElementById('dimTotTop').setAttribute('y2', '50');
+            document.getElementById('dimTotBot').setAttribute('x1', '205'); document.getElementById('dimTotBot').setAttribute('y1', '390'); document.getElementById('dimTotBot').setAttribute('x2', '215'); document.getElementById('dimTotBot').setAttribute('y2', '390');
+            labelTotalL.setAttribute('x', '195'); labelTotalL.setAttribute('y', '225'); labelTotalL.setAttribute('text-anchor', 'end');
+        }
+
+        function updateSVGHorizontal() {
+            // Lignes horizontales
+            document.getElementById('lineElemA').setAttribute('x1', '264');
+            document.getElementById('lineElemA').setAttribute('y1', '220');
+            document.getElementById('lineElemA').setAttribute('x2', '420');
+            document.getElementById('lineElemA').setAttribute('y2', '220');
+
+            document.getElementById('lineElemB').setAttribute('x1', '236');
+            document.getElementById('lineElemB').setAttribute('y1', '220');
+            document.getElementById('lineElemB').setAttribute('x2', '80');
+            document.getElementById('lineElemB').setAttribute('y2', '220');
+
+            // Coaxial sort par le bas
+            document.getElementById('coaxPath').setAttribute('d', 'M 250 234 L 250 330');
+            document.getElementById('coaxPathInner').setAttribute('d', 'M 250 234 L 250 330');
+            document.getElementById('coaxLabel').setAttribute('x', '250');
+            document.getElementById('coaxLabel').setAttribute('y', '350');
+            document.getElementById('coaxLabel').setAttribute('text-anchor', 'middle');
+
+            // Cote A (Droit)
+            document.getElementById('dimALine').setAttribute('x1', '264');
+            document.getElementById('dimALine').setAttribute('y1', '190');
+            document.getElementById('dimALine').setAttribute('x2', '420');
+            document.getElementById('dimALine').setAttribute('y2', '190');
+            document.getElementById('dimATop').setAttribute('x1', '264'); document.getElementById('dimATop').setAttribute('y1', '185'); document.getElementById('dimATop').setAttribute('x2', '264'); document.getElementById('dimATop').setAttribute('y2', '195');
+            document.getElementById('dimABot').setAttribute('x1', '420'); document.getElementById('dimABot').setAttribute('y1', '185'); document.getElementById('dimABot').setAttribute('x2', '420'); document.getElementById('dimABot').setAttribute('y2', '195');
+            labelElemA.setAttribute('x', '342'); labelElemA.setAttribute('y', '175'); labelElemA.setAttribute('text-anchor', 'middle');
+
+            // Cote B (Gauche)
+            document.getElementById('dimBLine').setAttribute('x1', '80');
+            document.getElementById('dimBLine').setAttribute('y1', '190');
+            document.getElementById('dimBLine').setAttribute('x2', '236');
+            document.getElementById('dimBLine').setAttribute('y2', '190');
+            document.getElementById('dimBTop').setAttribute('x1', '80'); document.getElementById('dimBTop').setAttribute('y1', '185'); document.getElementById('dimBTop').setAttribute('x2', '80'); document.getElementById('dimBTop').setAttribute('y2', '195');
+            document.getElementById('dimBBot').setAttribute('x1', '236'); document.getElementById('dimBBot').setAttribute('y1', '185'); document.getElementById('dimBBot').setAttribute('x2', '236'); document.getElementById('dimBBot').setAttribute('y2', '195');
+            labelElemB.setAttribute('x', '158'); labelElemB.setAttribute('y', '175'); labelElemB.setAttribute('text-anchor', 'middle');
+
+            // Cote Total (En-dessous)
+            document.getElementById('dimTotLine').setAttribute('x1', '80');
+            document.getElementById('dimTotLine').setAttribute('y1', '255');
+            document.getElementById('dimTotLine').setAttribute('x2', '420');
+            document.getElementById('dimTotLine').setAttribute('y2', '255');
+            document.getElementById('dimTotTop').setAttribute('x1', '80'); document.getElementById('dimTotTop').setAttribute('y1', '250'); document.getElementById('dimTotTop').setAttribute('x2', '80'); document.getElementById('dimTotTop').setAttribute('y2', '260');
+            document.getElementById('dimTotBot').setAttribute('x1', '420'); document.getElementById('dimTotBot').setAttribute('y1', '250'); document.getElementById('dimTotBot').setAttribute('x2', '420'); document.getElementById('dimTotBot').setAttribute('y2', '260');
+            labelTotalL.setAttribute('x', '250'); labelTotalL.setAttribute('y', '275'); labelTotalL.setAttribute('text-anchor', 'middle');
+        }
+
+        // Calcul de la géométrie et mise à jour
+        function calculateDipole() {
+            let freqValue = parseFloat(freqInput.value);
+            let vfValue = parseFloat(vfInput.value);
+
+            if (isNaN(freqValue) || freqValue <= 0) freqValue = 1090;
+            if (isNaN(vfValue) || vfValue <= 0 || vfValue > 1) vfValue = 0.95;
+
+            const C = 299792458; // Vitesse de la lumière (m/s)
+
+            // Longueur d'onde complète λ
+            const lambdaMeters = C / (freqValue * 1e6);
+            const lambdaCm = lambdaMeters * 100;
+
+            // Longueur totale L = (λ / 2) * VF
+            const totalLenCm = (lambdaCm / 2) * vfValue;
+            const totalLenM = totalLenCm / 100;
+            const totalLenMm = totalLenCm * 10;
+
+            // Longueur de chaque brin = L / 2
+            const elemACm = totalLenCm / 2;
+            const elemAMm = elemACm * 10;
+
+            const elemBCm = elemACm;
+            const elemBMm = elemAMm;
+
+            // Mettre à jour les textes
+            freqDisplay.textContent = `${freqValue.toFixed(2)} MHz`;
+            vfDisplay.textContent = vfValue.toFixed(2);
+
+            totalLenCmEl.innerHTML = `${totalLenCm.toFixed(2)} <span class="text-base text-gray-400 font-sans">cm</span>`;
+            totalLenMEl.textContent = `${totalLenM.toFixed(3)} m / ${totalLenMm.toFixed(1)} mm`;
+
+            elemACmEl.innerHTML = `${elemACm.toFixed(2)} <span class="text-xs text-gray-400 font-sans">cm</span>`;
+            elemAMmEl.textContent = `${elemAMm.toFixed(1)} mm`;
+
+            elemBCmEl.innerHTML = `${elemBCm.toFixed(2)} <span class="text-xs text-gray-400 font-sans">cm</span>`;
+            elemBMmEl.textContent = `${elemBMm.toFixed(1)} mm`;
+
+            lambdaValEl.textContent = `${lambdaCm.toFixed(1)} cm`;
+
+            // Mettre à jour les étiquettes sur le SVG
+            labelElemA.textContent = `Brin A = ${elemACm.toFixed(1)} cm`;
+            labelElemB.textContent = `Brin B = ${elemBCm.toFixed(1)} cm`;
+            labelTotalL.textContent = `L (Total) = ${totalLenCm.toFixed(1)} cm`;
+        }
+
+        // Copier les résultats
+        function copyResults() {
+            const freq = freqInput.value;
+            const total = totalLenCmEl.innerText.replace('\n', ' ');
+            const elemA = elemACmEl.innerText.replace('\n', ' ');
+            const elemB = elemBCmEl.innerText.replace('\n', ' ');
+            
+            const textToCopy = `Calcul Antenne Dipôle 1/2 λ pour ${freq} MHz:\n- Longueur Totale L: ${total}\n- Brin A (Âme): ${elemA}\n- Brin B (Masse): ${elemB}\n- VF: ${vfInput.value}`;
+
+            const copyBtnText = document.getElementById('copyBtnText');
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    copyBtnText.textContent = "Copié !";
+                    setTimeout(() => copyBtnText.textContent = "Copier", 2000);
+                });
+            } else {
+                // Fallback execCommand
+                const textArea = document.createElement("textarea");
+                textArea.value = textToCopy;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                copyBtnText.textContent = "Copié !";
+                setTimeout(() => copyBtnText.textContent = "Copier", 2000);
+            }
+        }
+
+        // Initialisation au chargement
+        window.onload = function() {
+            calculateDipole();
+        };
+    </script>
+</body>
+</html>

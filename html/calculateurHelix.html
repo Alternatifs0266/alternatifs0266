@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculateur d'Antenne Hélicoïdale & QFH</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --primary: #38bdf8;
+      --accent: #f59e0b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text);
+      margin: 0;
+      padding: 20px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 850px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .header {
+      grid-column: 1 / -1;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .header h1 {
+      color: var(--primary);
+      margin: 0 0 5px 0;
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--text-muted);
+      font-size: 0.9em;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 8px 12px;
+      background: #0f172a;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    .presets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 8px;
+    }
+
+    .btn {
+      background: var(--border);
+      color: var(--text);
+      border: none;
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.85em;
+    }
+
+    .btn:hover {
+      background: var(--primary);
+      color: #000;
+    }
+
+    .btn-toggle {
+      background: var(--card-bg);
+      border: 1px solid var(--primary);
+      color: var(--primary);
+      width: 100%;
+      padding: 8px;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    .btn-toggle.active {
+      background: var(--primary);
+      color: #000;
+    }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .result-item {
+      background: rgba(15, 23, 42, 0.6);
+      padding: 10px;
+      border-radius: 4px;
+      border-left: 3px solid var(--primary);
+    }
+
+    .result-item .val {
+      font-size: 1.2em;
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    .svg-container {
+      width: 100%;
+      height: 400px;
+      background: #090d16;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>Calculateur Hélicoïdal & QFH</h1>
+    <p style="color: var(--text-muted); margin: 0;">Antennes à polarisation circulaire (RHCP / LHCP)</p>
+  </div>
+
+  <div class="card">
+    <div class="form-group">
+      <label>Type d'antenne</label>
+      <select id="antennaType" onchange="calculate()">
+        <option value="qfh">QFH (Quadrifilar Helix)</option>
+        <option value="helix">Hélicoïdale Axiale (Axial Helical)</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Fréquence (MHz)</label>
+      <input type="number" id="freq" value="1090" step="0.1" oninput="calculate()">
+      <div class="presets">
+        <button class="btn" onclick="setFreq(137.5)">137.5 (NOAA)</button>
+        <button class="btn" onclick="setFreq(433.92)">433.92 (UHF)</button>
+        <button class="btn" onclick="setFreq(1090)">1090 (ADS-B)</button>
+        <button class="btn" onclick="setFreq(1575.42)">1575 (GPS)</button>
+        <button class="btn" onclick="setFreq(2400)">2400 (Wi-Fi/QO100)</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Polarisation</label>
+      <div style="display: flex; gap: 10px;">
+        <button id="btnRhcp" class="btn btn-toggle active" onclick="setPol('RHCP')">RHCP (Dextrogyre)</button>
+        <button id="btnLhcp" class="btn btn-toggle" onclick="setPol('LHCP')">LHCP (Lévogyre)</button>
+      </div>
+    </div>
+
+    <!-- Paramètre Nombre de tours (commun et modulable) -->
+    <div class="form-group">
+      <label>Nombre de tours (N)</label>
+      <input type="number" id="turns" value="0.5" step="0.5" min="0.5" max="30" oninput="calculate()">
+      <div class="presets">
+        <button class="btn" onclick="setTurns(0.5)">0.5 tour</button>
+        <button class="btn" onclick="setTurns(1)">1.0 tour</button>
+        <button class="btn" onclick="setTurns(1.5)">1.5 tours</button>
+        <button class="btn" onclick="setTurns(2)">2.0 tours</button>
+        <button class="btn" onclick="setTurns(5)">5.0 tours</button>
+        <button class="btn" onclick="setTurns(8)">8.0 tours</button>
+      </div>
+    </div>
+
+    <div id="qfhInputs">
+      <div class="form-group">
+        <label>Ratio Hauteur / Largeur (QFH)</label>
+        <input type="number" id="qfhRatio" value="2.0" step="0.1" oninput="calculate()">
+      </div>
+    </div>
+
+    <div class="results-grid" id="results"></div>
+  </div>
+
+  <div class="card">
+    <h3>Schéma dynamique</h3>
+    <div class="svg-container">
+      <svg id="svgPlot" viewBox="0 0 400 400"></svg>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentPol = 'RHCP';
+
+  function setFreq(f) {
+    document.getElementById('freq').value = f;
+    calculate();
+  }
+
+  function setTurns(n) {
+    document.getElementById('turns').value = n;
+    calculate();
+  }
+
+  function setPol(pol) {
+    currentPol = pol;
+    document.getElementById('btnRhcp').classList.toggle('active', pol === 'RHCP');
+    document.getElementById('btnLhcp').classList.toggle('active', pol === 'LHCP');
+    calculate();
+  }
+
+  function calculate() {
+    const type = document.getElementById('antennaType').value;
+    const freq = parseFloat(document.getElementById('freq').value);
+    const wavelength = 299792458 / (freq * 1e6); // en mètres
+    const wlMm = wavelength * 1000;
+    const turns = parseFloat(document.getElementById('turns').value) || 0.5;
+
+    document.getElementById('qfhInputs').style.display = type === 'qfh' ? 'block' : 'none';
+
+    if (type === 'qfh') {
+      calcQFH(wlMm, turns);
+    } else {
+      calcHelix(wlMm, turns);
+    }
+  }
+
+  function calcQFH(wl, turns) {
+    const ratio = parseFloat(document.getElementById('qfhRatio').value);
+    const H = wl * turns * (ratio / 2);
+    const W = H / (ratio * turns);
+    const diameTube = wl * 0.02;
+
+    const resHTML = `
+      <div class="result-item"><label>Hauteur totale (H)</label><div class="val">${H.toFixed(1)} mm</div></div>
+      <div class="result-item"><label>Largeur (W)</label><div class="val">${W.toFixed(1)} mm</div></div>
+      <div class="result-item"><label>Longueur d'onde (λ)</label><div class="val">${wl.toFixed(1)} mm</div></div>
+      <div class="result-item"><label>Tours / Torsion</label><div class="val">${turns} (${turns * 360}°)</div></div>
+    `;
+    document.getElementById('results').innerHTML = resHTML;
+
+    drawQFH(H, W, turns);
+  }
+
+  function calcHelix(wl, turns) {
+    const N = turns;
+    const D = wl / Math.PI; // Diamètre hélice
+    const S = wl * 0.23; // Pas (Alpha ~ 13 deg)
+    const Refl = wl * 0.8; // Réflecteur
+    const Gain = 10 + 10 * Math.log10(Math.max(0.5, N) * S / wl); // Est. gain dBi
+
+    const resHTML = `
+      <div class="result-item"><label>Diamètre hélice (D)</label><div class="val">${D.toFixed(1)} mm</div></div>
+      <div class="result-item"><label>Pas de spire (S)</label><div class="val">${S.toFixed(1)} mm</div></div>
+      <div class="result-item"><label>Côté Réflecteur</label><div class="val">${Refl.toFixed(1)} mm</div></div>
+      <div class="result-item"><label>Gain estimé</label><div class="val">${Gain.toFixed(1)} dBi</div></div>
+    `;
+    document.getElementById('results').innerHTML = resHTML;
+
+    drawHelix(D, S, N, Refl);
+  }
+
+  function drawQFH(H, W, turns) {
+    const svg = document.getElementById('svgPlot');
+    const dir = currentPol === 'RHCP' ? 1 : -1;
+    
+    // Génération précise des torsions de la QFH selon N tours
+    const points = 50;
+    let path1 = '';
+    let path2 = '';
+    const startY = 320;
+    const totalHeight = 240;
+
+    for (let i = 0; i <= points; i++) {
+      const progress = i / points;
+      const y = startY - (progress * totalHeight);
+      const angle = progress * (turns * 2 * Math.PI) * dir;
+      const x1 = 200 + Math.sin(angle) * 60;
+      const x2 = 200 - Math.sin(angle) * 60;
+
+      if (i === 0) {
+        path1 += `M ${x1} ${y}`;
+        path2 += `M ${x2} ${y}`;
+      } else {
+        path1 += ` L ${x1} ${y}`;
+        path2 += ` L ${x2} ${y}`;
+      }
+    }
+    
+    svg.innerHTML = `
+      <!-- Réflecteur / Base -->
+      <line x1="100" y1="350" x2="300" y2="350" stroke="#334155" stroke-width="4"/>
+      <!-- Support Central -->
+      <line x1="200" y1="350" x2="200" y2="50" stroke="#475569" stroke-width="8" stroke-dasharray="5,5"/>
+      <!-- Boucles Helicoïdales -->
+      <path d="${path1}" fill="none" stroke="#38bdf8" stroke-width="5"/>
+      <path d="${path2}" fill="none" stroke="#f59e0b" stroke-width="5"/>
+      <!-- Connexions Haut/Bas -->
+      <line x1="140" y1="320" x2="260" y2="320" stroke="#38bdf8" stroke-width="3"/>
+      <line x1="${200 + Math.sin(turns * 2 * Math.PI * dir) * 60}" y1="80" x2="${200 - Math.sin(turns * 2 * Math.PI * dir) * 60}" y2="80" stroke="#f59e0b" stroke-width="3"/>
+      <!-- Texte Polarisation -->
+      <text x="20" y="30" fill="#38bdf8" font-size="14">Polarisation: ${currentPol}</text>
+      <text x="20" y="50" fill="#94a3b8" font-size="12">Nb de tours QFH: ${turns} (${turns * 360}°)</text>
+    `;
+  }
+
+  function drawHelix(D, S, N, Refl) {
+    const svg = document.getElementById('svgPlot');
+    const dir = currentPol === 'RHCP' ? 1 : -1;
+    
+    // Tracé réel et continu de l'hélice axiale sur N tours exacts
+    const pointsPerTurn = 36;
+    const totalPoints = Math.round(N * pointsPerTurn);
+    const startY = 330;
+    const maxHeight = 270;
+    
+    // Ajustement dynamique de l'échelle verticale pour que N tours rentrent dans la zone SVG
+    const stepY = maxHeight / Math.max(totalPoints, 18);
+
+    let path = '';
+    for (let i = 0; i <= totalPoints; i++) {
+      const angle = (i / pointsPerTurn) * (2 * Math.PI) * dir;
+      const x = 200 + Math.cos(angle) * 50;
+      const y = startY - (i * stepY);
+      
+      if (i === 0) {
+        path += `M ${x} ${y}`;
+      } else {
+        path += ` L ${x} ${y}`;
+      }
+    }
+
+    svg.innerHTML = `
+      <!-- Plan de masse / Réflecteur -->
+      <rect x="80" y="330" width="240" height="10" fill="#475569" rx="2"/>
+      <text x="200" y="360" fill="#94a3b8" font-size="12" text-anchor="middle">Réflecteur Plan de Masse</text>
+      <!-- Axe Central -->
+      <line x1="200" y1="330" x2="200" y2="40" stroke="#334155" stroke-width="4" stroke-dasharray="4,4"/>
+      <!-- Spire Hélicoïdale -->
+      <path d="${path}" fill="none" stroke="#38bdf8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- Texte Polarisation -->
+      <text x="20" y="30" fill="#38bdf8" font-size="14">Polarisation: ${currentPol}</text>
+      <text x="20" y="50" fill="#94a3b8" font-size="12">Spires exactes (N): ${N}</text>
+    `;
+  }
+
+  // Premier calcul au chargement
+  calculate();
+</script>
+
+</body>
+</html>

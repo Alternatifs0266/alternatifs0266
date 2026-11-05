@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculateur Antenne Long Fil & UNUN (EFHW / Random Wire)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        rf: {
+                            dark: '#0a0e17',
+                            card: '#121824',
+                            border: '#1e293b',
+                            accent: '#38bdf8',
+                            emerald: '#10b981',
+                            amber: '#f59e0b',
+                            purple: '#a855f7',
+                            rose: '#f43f5e'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0a0e17;
+            color: #cbd5e1;
+        }
+        .glow-accent {
+            box-shadow: 0 0 25px rgba(56, 189, 248, 0.12);
+        }
+        .glow-emerald {
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.12);
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #38bdf8;
+            cursor: pointer;
+            border: 2px solid #0a0e17;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased min-h-screen pb-12">
+
+    <!-- En-tête -->
+    <header class="border-b border-rf-border bg-rf-card/90 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2.5 bg-rf-accent/10 border border-rf-accent/30 rounded-xl text-rf-accent">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-white tracking-wide flex items-center gap-2">
+                        RF-Calc <span class="text-xs px-2 py-0.5 rounded bg-rf-accent/20 text-rf-accent font-mono border border-rf-accent/30">Long Fil & UNUN</span>
+                    </h1>
+                    <p class="text-xs text-gray-400">EFHW (End-Fed Half-Wave), Random Wire & Adaptateurs UNUN 49:1, 64:1, 9:1</p>
+                </div>
+            </div>
+            <!-- Presets Bandes -->
+            <div class="flex flex-wrap items-center justify-center gap-1.5 text-xs font-mono">
+                <span class="text-gray-500 mr-1 hidden lg:inline text-sans">Bandes HF:</span>
+                <button onclick="selectBand(3.65, '80m')" class="px-2 py-1 rounded bg-rf-border hover:bg-gray-700 text-gray-300 transition">80m</button>
+                <button onclick="selectBand(7.10, '40m')" class="px-2 py-1 rounded bg-rf-border hover:bg-gray-700 text-gray-300 transition">40m</button>
+                <button onclick="selectBand(10.12, '30m')" class="px-2 py-1 rounded bg-rf-border hover:bg-gray-700 text-gray-300 transition">30m</button>
+                <button onclick="selectBand(14.18, '20m')" class="px-2 py-1 rounded bg-rf-border hover:bg-gray-700 text-gray-300 transition">20m</button>
+                <button onclick="selectBand(18.11, '17m')" class="px-2 py-1 rounded bg-rf-border hover:bg-gray-700 text-gray-300 transition">17m</button>
+                <button onclick="selectBand(21.20, '15m')" class="px-2 py-1 rounded bg-rf-border hover:bg-gray-700 text-gray-300 transition">15m</button>
+                <button onclick="selectBand(28.50, '10m')" class="px-2 py-1 rounded bg-rf-border hover:bg-gray-700 text-gray-300 transition">10m</button>
+                <button onclick="selectBand(1090, 'ADS-B')" class="px-2 py-1 rounded bg-rf-accent/20 border border-rf-accent/40 text-rf-accent font-semibold transition">1090 MHz</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenu Principal -->
+    <main class="max-w-7xl mx-auto px-4 mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+        <!-- Colonne Gauche : Configuration (5 cols) -->
+        <section class="lg:col-span-5 space-y-6">
+            
+            <div class="bg-rf-card border border-rf-border rounded-2xl p-6 glow-accent">
+                <h2 class="text-lg font-semibold text-white mb-5 flex items-center gap-2 border-b border-rf-border pb-3">
+                    <svg class="w-5 h-5 text-rf-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                    </svg>
+                    Paramètres de l'Antenne & UNUN
+                </h2>
+
+                <div class="space-y-5">
+                    <!-- Type d'antenne / UNUN Ratio -->
+                    <div>
+                        <label class="text-sm font-medium text-gray-200 block mb-2">Type d'Antenne & Adaptateur UNUN</label>
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <label class="cursor-pointer border border-rf-border rounded-xl p-3 bg-rf-dark flex flex-col gap-1 hover:border-gray-500 transition has-[:checked]:border-rf-accent has-[:checked]:bg-rf-accent/10">
+                                <input type="radio" name="ununType" value="49" checked class="sr-only" onchange="updateCalculations()">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm font-bold text-white">49:1 UNUN</span>
+                                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-rf-accent/20 text-rf-accent font-mono">EFHW</span>
+                                </div>
+                                <span class="text-xs text-gray-400">Demi-onde en bout (2450 Ω → 50 Ω)</span>
+                            </label>
+
+                            <label class="cursor-pointer border border-rf-border rounded-xl p-3 bg-rf-dark flex flex-col gap-1 hover:border-gray-500 transition has-[:checked]:border-rf-accent has-[:checked]:bg-rf-accent/10">
+                                <input type="radio" name="ununType" value="64" class="sr-only" onchange="updateCalculations()">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm font-bold text-white">64:1 UNUN</span>
+                                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-rf-purple/20 text-rf-purple font-mono">EFHW High Z</span>
+                                </div>
+                                <span class="text-xs text-gray-400">Haute impédance (3200 Ω → 50 Ω)</span>
+                            </label>
+
+                            <label class="cursor-pointer border border-rf-border rounded-xl p-3 bg-rf-dark flex flex-col gap-1 hover:border-gray-500 transition has-[:checked]:border-rf-accent has-[:checked]:bg-rf-accent/10">
+                                <input type="radio" name="ununType" value="9" class="sr-only" onchange="updateCalculations()">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm font-bold text-white">9:1 UNUN</span>
+                                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-rf-emerald/20 text-rf-emerald font-mono">Random Wire</span>
+                                </div>
+                                <span class="text-xs text-gray-400">Fil non-résonnant (450 Ω → 50 Ω)</span>
+                            </label>
+
+                            <label class="cursor-pointer border border-rf-border rounded-xl p-3 bg-rf-dark flex flex-col gap-1 hover:border-gray-500 transition has-[:checked]:border-rf-accent has-[:checked]:bg-rf-accent/10">
+                                <input type="radio" name="ununType" value="1" class="sr-only" onchange="updateCalculations()">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm font-bold text-white">1:1 Choke</span>
+                                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-rf-amber/20 text-rf-amber font-mono">Isolateur</span>
+                                </div>
+                                <span class="text-xs text-gray-400">Choke de ligne / Direct (50 Ω → 50 Ω)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Fréquence -->
+                    <div>
+                        <div class="flex justify-between items-center mb-1.5">
+                            <label for="frequency" class="text-sm font-medium text-gray-200">Fréquence Fondamentale (MHz)</label>
+                            <span class="text-xs text-rf-accent font-mono" id="freqDisplay">7.100 MHz</span>
+                        </div>
+                        <div class="relative">
+                            <input type="number" id="frequency" value="7.10" step="0.001" min="0.1" max="6000" 
+                                class="w-full bg-rf-dark border border-rf-border rounded-xl px-4 py-2.5 text-white font-mono focus:outline-none focus:border-rf-accent text-lg"
+                                oninput="updateCalculations()">
+                            <div class="absolute right-3 top-2.5 text-sm text-gray-500 font-mono">MHz</div>
+                        </div>
+                    </div>
+
+                    <!-- Facteur de Vélocité -->
+                    <div>
+                        <div class="flex justify-between items-center mb-1.5">
+                            <label for="velocityFactor" class="text-sm font-medium text-gray-200">Facteur de Vélocité (VF)</label>
+                            <span class="text-xs text-rf-amber font-mono" id="vfDisplay">0.95</span>
+                        </div>
+                        <div class="flex gap-3">
+                            <input type="number" id="velocityFactor" value="0.95" step="0.01" min="0.50" max="1.00"
+                                class="w-28 bg-rf-dark border border-rf-border rounded-xl px-3 py-2 text-white font-mono focus:outline-none focus:border-rf-accent text-center"
+                                oninput="updateCalculations()">
+                            <select id="vfPresets" class="flex-1 bg-rf-dark border border-rf-border rounded-xl px-3 py-2 text-xs text-gray-300 focus:outline-none focus:border-rf-accent"
+                                onchange="document.getElementById('velocityFactor').value = this.value; updateCalculations();">
+                                <option value="0.95" selected>Fil cuivre isolé PVC (0.95)</option>
+                                <option value="0.97">Fil cuivre nu / émaillé (0.97)</option>
+                                <option value="0.98">Tige / Tube aluminium (0.98)</option>
+                                <option value="0.90">Câble très isolé / DX-wire (0.90)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Configuration Géométrique / Déploiement -->
+                    <div>
+                        <label class="text-sm font-medium text-gray-200 block mb-2">Géométrie de Déploiement</label>
+                        <select id="geometrySelect" class="w-full bg-rf-dark border border-rf-border rounded-xl px-3 py-2.5 text-sm text-gray-200 focus:outline-none focus:border-rf-accent" onchange="updateCalculations()">
+                            <option value="sloper">Sloper Incliné (UNUN au sol / mât haut)</option>
+                            <option value="invertedL">Inverted-L (Partie verticale + Horizontale)</option>
+                            <option value="horizontal">Horizontal End-Fed (Entre deux points)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Résultats des Calculs -->
+            <div class="bg-rf-card border border-rf-border rounded-2xl p-6 glow-emerald">
+                <h2 class="text-lg font-semibold text-white mb-4 flex items-center gap-2 border-b border-rf-border pb-3">
+                    <svg class="w-5 h-5 text-rf-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m-6 4h6m-6 4h6M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    Résultats & Dimensions
+                </h2>
+
+                <div class="space-y-4">
+                    <!-- Longueur Principale de brin -->
+                    <div class="bg-rf-dark border border-rf-emerald/40 rounded-xl p-4">
+                        <div class="text-xs text-rf-emerald font-semibold uppercase tracking-wider mb-1" id="mainWireTitle">Longueur du Brin Rayonnant</div>
+                        <div class="text-3xl font-bold text-white font-mono" id="mainWireM">0.00 <span class="text-base text-gray-400 font-sans">mètres</span></div>
+                        <div class="text-xs text-gray-400 font-mono mt-1" id="mainWireFeet">0.00 ft / 0.0 cm</div>
+                    </div>
+
+                    <!-- Contreoids / Contre-point de masse -->
+                    <div class="bg-rf-dark border border-rf-accent/30 rounded-xl p-3.5">
+                        <div class="text-xs text-rf-accent font-semibold uppercase tracking-wider mb-1">Contrepoids Recommandé (Counterpoise)</div>
+                        <div class="text-xl font-bold text-white font-mono" id="counterpoiseM">0.00 <span class="text-xs text-gray-400 font-sans">mètres</span></div>
+                        <div class="text-xs text-gray-400 font-mono mt-0.5" id="counterpoiseFeet">0.00 ft (~0.05 λ)</div>
+                    </div>
+
+                    <!-- Impédances -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-rf-dark border border-rf-border rounded-xl p-3">
+                            <div class="text-xs text-gray-400">Impédance d'Entrée</div>
+                            <div class="text-base font-semibold text-rf-amber font-mono" id="inputImpVal">~2450 Ω</div>
+                        </div>
+                        <div class="bg-rf-dark border border-rf-border rounded-xl p-3">
+                            <div class="text-xs text-gray-400">Sortie vers Coaxial</div>
+                            <div class="text-base font-semibold text-rf-accent font-mono" id="coaxImpVal">50.0 Ω (ROS ≈ 1.0)</div>
+                        </div>
+                    </div>
+
+                    <!-- Tableau des Harmoniques (pour EFHW) ou Longueurs magiques (pour 9:1) -->
+                    <div id="harmonicsContainer" class="bg-rf-dark border border-rf-border rounded-xl p-3 text-xs">
+                        <div class="font-semibold text-gray-300 mb-2 border-b border-rf-border/60 pb-1" id="harmonicsTitle">Harmoniques Multi-bandes Résonnantes :</div>
+                        <div class="flex flex-wrap gap-1.5 font-mono" id="harmonicsList">
+                            <!-- Rempli en JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Colonne Droite : Schéma SVG & Longueurs Magiques (7 cols) -->
+        <section class="lg:col-span-7 space-y-6">
+
+            <!-- Schéma SVG Interactif -->
+            <div class="bg-rf-card border border-rf-border rounded-2xl p-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-rf-border pb-3 mb-4">
+                    <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+                        <svg class="w-5 h-5 text-rf-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        Schématique Système & Transformateur UNUN
+                    </h2>
+                    <span id="ununBadge" class="px-2.5 py-1 text-xs rounded-lg bg-rf-accent/20 text-rf-accent font-mono border border-rf-accent/30 self-start sm:self-auto">
+                        UNUN 49:1 (Autotransformateur)
+                    </span>
+                </div>
+
+                <!-- Zone de dessin SVG -->
+                <div class="relative bg-rf-dark border border-rf-border rounded-xl p-4 flex items-center justify-center min-h-[420px]">
+                    
+                    <svg id="svgAntenna" viewBox="0 0 540 440" class="w-full h-auto max-h-[440px] transition-all duration-300">
+                        <defs>
+                            <pattern id="gridRf" width="20" height="20" patternUnits="userSpaceOnUse">
+                                <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#172033" stroke-width="1"/>
+                            </pattern>
+                            <!-- Gradients -->
+                            <linearGradient id="wireGrad" x1="0" y1="0" x2="1" y2="0">
+                                <stop offset="0%" stop-color="#38bdf8"/>
+                                <stop offset="100%" stop-color="#3b82f6"/>
+                            </linearGradient>
+                            <linearGradient id="toroidGrad" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stop-color="#f59e0b"/>
+                                <stop offset="100%" stop-color="#b45309"/>
+                            </linearGradient>
+                        </defs>
+
+                        <!-- Fond -->
+                        <rect width="540" height="440" fill="url(#gridRf)" rx="8" />
+
+                        <!-- Sol (Ground Line) -->
+                        <line x1="20" y1="380" x2="520" y2="380" stroke="#334155" stroke-width="2" stroke-dasharray="6,4"/>
+                        <text x="30" y="398" font-family="Inter" font-size="10" fill="#64748b">Sol / Terre (Ground Level)</text>
+
+                        <!-- Mât / Support de départ -->
+                        <line id="mastLeft" x1="60" y1="380" x2="60" y2="280" stroke="#475569" stroke-width="4"/>
+                        
+                        <!-- Mât / Support d'arrivée -->
+                        <line id="mastRight" x1="480" y1="380" x2="480" y2="100" stroke="#475569" stroke-width="4"/>
+
+                        <!-- Boîtier UNUN au pied du système -->
+                        <g transform="translate(45, 275)">
+                            <rect x="0" y="0" width="40" height="45" fill="#1e293b" stroke="#38bdf8" stroke-width="2" rx="4"/>
+                            <text x="20" y="26" font-family="JetBrains Mono" font-size="10" fill="#38bdf8" text-anchor="middle" font-weight="bold" id="svgUnunLabel">49:1</text>
+                            
+                            <!-- Connecteur BNC/SO239 -->
+                            <rect x="-8" y="28" width="8" height="10" fill="#94a3b8"/>
+                        </g>
+
+                        <!-- Câble Coaxial vers Émetteur -->
+                        <path d="M 37 310 L 37 380 L 10 380" fill="none" stroke="#64748b" stroke-width="4"/>
+                        <text x="15" y="370" font-family="JetBrains Mono" font-size="9" fill="#94a3b8">Vers TX/SDR (50Ω)</text>
+
+                        <!-- Choke de gaine (optionnel représenté sur coaxial) -->
+                        <rect x="31" y="335" width="12" height="20" fill="#a855f7" rx="2"/>
+                        <text x="50" y="348" font-family="Inter" font-size="9" fill="#c084fc">Choke RF</text>
+
+                        <!-- Fil Contrepoids (Counterpoise) -->
+                        <line id="svgCounterpoise" x1="65" y1="320" x2="160" y2="380" stroke="#10b981" stroke-width="2.5" stroke-dasharray="4,2"/>
+                        <text id="svgCounterpoiseLabel" x="120" y="355" font-family="JetBrains Mono" font-size="10" fill="#10b981">Contrepoids = -- m</text>
+
+                        <!-- Isolateur de départ -->
+                        <rect x="85" y="270" width="14" height="8" fill="#e2e8f0" rx="2"/>
+
+                        <!-- Fil d'antenne principal (Drawn dynamically in JS according to layout) -->
+                        <path id="svgMainWire" d="M 99 274 L 466 104" fill="none" stroke="url(#wireGrad)" stroke-width="3.5" stroke-linecap="round"/>
+
+                        <!-- Isolateur de fin + Cordeau d'ancrage -->
+                        <rect id="isoRight" x="466" y="100" width="14" height="8" fill="#e2e8f0" rx="2"/>
+                        <line id="ropeRight" x1="480" y1="104" x2="480" y2="100" stroke="#64748b" stroke-width="1.5" stroke-dasharray="2,2"/>
+
+                        <!-- Cotes et Dimensions sur le SVG -->
+                        <g id="svgDimensions">
+                            <line id="dimLineMain" x1="99" y1="250" x2="466" y2="80" stroke="#38bdf8" stroke-width="1" stroke-dasharray="3,3"/>
+                            <text id="svgMainWireLabel" x="280" y="150" font-family="JetBrains Mono" font-size="13" fill="#38bdf8" font-weight="bold" text-anchor="middle">L = -- m</text>
+                        </g>
+
+                        <!-- Schéma Interne du Torode / Schéma Électrique UNUN (Encadré en haut à gauche) -->
+                        <g transform="translate(15, 15)">
+                            <rect width="180" height="120" fill="#0f172a" stroke="#1e293b" stroke-width="1.5" rx="6"/>
+                            <text x="10" y="18" font-family="Inter" font-size="10" fill="#94a3b8" font-weight="bold">Schéma Interne UNUN</text>
+
+                            <!-- Tore de Ferrite FT240-43 -->
+                            <circle cx="50" cy="65" r="28" fill="none" stroke="url(#toroidGrad)" stroke-width="12"/>
+                            
+                            <!-- Bobinage Primaire & Secondaire (Schématique) -->
+                            <path d="M 40 40 Q 50 35 60 40 Q 70 45 60 55 Q 50 65 60 75" fill="none" stroke="#38bdf8" stroke-width="2"/>
+                            
+                            <!-- Détails du ratio -->
+                            <text x="95" y="45" font-family="JetBrains Mono" font-size="11" fill="#white" font-weight="bold" id="schemaRatioText">Ratio 49:1</text>
+                            <text x="95" y="62" font-family="Inter" font-size="9" fill="#94a3b8" id="schemaToursText">2 tours / 14 tours</text>
+                            <text x="95" y="78" font-family="Inter" font-size="9" fill="#f59e0b" id="schemaCapacitorText">+ Capa 100pF (C1)</text>
+                            <text x="95" y="98" font-family="JetBrains Mono" font-size="9" fill="#10b981" id="schemaImpText">Z_in: ~2.5 kΩ</text>
+                        </g>
+
+                    </svg>
+
+                </div>
+            </div>
+
+            <!-- Table des Longueurs "Random Wire" (9:1 UNUN) -->
+            <div class="bg-rf-card border border-rf-border rounded-2xl p-6">
+                <h3 class="text-base font-bold text-white mb-3 flex items-center justify-between border-b border-rf-border pb-3">
+                    <span class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-rf-amber" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                        Longueurs Recommandées "Random Wire" (UNUN 9:1)
+                    </span>
+                    <span class="text-xs text-gray-400 font-normal">Évite les demi-ondes résonnantes</span>
+                </h3>
+
+                <p class="text-xs text-gray-400 mb-4">
+                    Pour une antenne filaire non-résonnante alimentée par un **UNUN 9:1**, la longueur du brin **ne doit surtout pas** être un multiple de demi-onde ($\lambda/2$) sur les bandes utilisées. Voici les longueurs idéales :
+                </p>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 font-mono text-xs">
+                    <div class="bg-rf-dark border border-rf-border p-2.5 rounded-lg text-center cursor-pointer hover:border-rf-accent transition" onclick="setCustomWireMeters(8.8)">
+                        <div class="text-rf-accent font-bold">8.8 m</div>
+                        <div class="text-[10px] text-gray-500">29 ft (40m-10m)</div>
+                    </div>
+                    <div class="bg-rf-dark border border-rf-border p-2.5 rounded-lg text-center cursor-pointer hover:border-rf-accent transition" onclick="setCustomWireMeters(10.8)">
+                        <div class="text-rf-accent font-bold">10.8 m</div>
+                        <div class="text-[10px] text-gray-500">35.5 ft (40m-10m)</div>
+                    </div>
+                    <div class="bg-rf-dark border border-rf-border p-2.5 rounded-lg text-center cursor-pointer hover:border-rf-accent transition" onclick="setCustomWireMeters(16.2)">
+                        <div class="text-rf-emerald font-bold">16.2 m ★</div>
+                        <div class="text-[10px] text-gray-500">53 ft (80m-10m)</div>
+                    </div>
+                    <div class="bg-rf-dark border border-rf-border p-2.5 rounded-lg text-center cursor-pointer hover:border-rf-accent transition" onclick="setCustomWireMeters(21.6)">
+                        <div class="text-rf-emerald font-bold">21.6 m ★</div>
+                        <div class="text-[10px] text-gray-500">71 ft (80m-10m)</div>
+                    </div>
+                    <div class="bg-rf-dark border border-rf-border p-2.5 rounded-lg text-center cursor-pointer hover:border-rf-accent transition" onclick="setCustomWireMeters(25.6)">
+                        <div class="text-rf-accent font-bold">25.6 m</div>
+                        <div class="text-[10px] text-gray-500">84 ft (160m-10m)</div>
+                    </div>
+                    <div class="bg-rf-dark border border-rf-border p-2.5 rounded-lg text-center cursor-pointer hover:border-rf-accent transition" onclick="setCustomWireMeters(33.5)">
+                        <div class="text-rf-accent font-bold">33.5 m</div>
+                        <div class="text-[10px] text-gray-500">110 ft (160m-10m)</div>
+                    </div>
+                    <div class="bg-rf-dark border border-rf-border p-2.5 rounded-lg text-center cursor-pointer hover:border-rf-accent transition" onclick="setCustomWireMeters(37.8)">
+                        <div class="text-rf-accent font-bold">37.8 m</div>
+                        <div class="text-[10px] text-gray-500">124 ft (160m-10m)</div>
+                    </div>
+                    <div class="bg-rf-dark border border-rf-border p-2.5 rounded-lg text-center cursor-pointer hover:border-rf-accent transition" onclick="setCustomWireMeters(45.1)">
+                        <div class="text-rf-accent font-bold">45.1 m</div>
+                        <div class="text-[10px] text-gray-500">148 ft (160m-10m)</div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Guide Pratique UNUN & Conseils -->
+    <footer class="max-w-7xl mx-auto px-4 mt-12">
+        <div class="bg-rf-card border border-rf-border rounded-2xl p-6 lg:p-8 space-y-6">
+            <h3 class="text-xl font-bold text-white flex items-center gap-2 border-b border-rf-border pb-4">
+                <svg class="w-6 h-6 text-rf-amber" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Guide Technique : Choisir le bon UNUN (49:1 vs 64:1 vs 9:1)
+            </h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+                <div class="bg-rf-dark border border-rf-border rounded-xl p-4 space-y-2">
+                    <div class="font-semibold text-rf-accent flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-full bg-rf-accent/20 text-rf-accent flex items-center justify-center text-xs">1</span>
+                        49:1 / 64:1 UNUN (EFHW Résonnante)
+                    </div>
+                    <p class="text-gray-400 text-xs leading-relaxed">
+                        • <strong>Antenne EFHW :</strong> Le brin mesure exactement **$\lambda/2$** sur la bande fondamentale (ex: 20m pour 7 MHz).<br>
+                        • **Avantage :** Fonctionne de manière résonnante sur la fondamentale ET TOUTES SES HARMONIQUES (40m, 20m, 15m, 10m) sans boîte d'accord (ATU) !<br>
+                        • **Capacité C1 :** Un condensateur 100 pF (1 kV) en parallèle sur le primaire compense la réactance sur les bandes hautes (10m/15m).
+                    </p>
+                </div>
+
+                <div class="bg-rf-dark border border-rf-border rounded-xl p-4 space-y-2">
+                    <div class="font-semibold text-rf-emerald flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-full bg-rf-emerald/20 text-rf-emerald flex items-center justify-center text-xs">2</span>
+                        9:1 UNUN (Random Wire Non-Résonnante)
+                    </div>
+                    <p class="text-gray-400 text-xs leading-relaxed">
+                        • **Principe :** On utilise une longueur de brin **arbitraire non résonnante** (ex: 16.2m ou 21.6m) pour ramener l'impédance autour de 300-600 $\Omega$.<br>
+                        • L'UNUN 9:1 divise cette impédance par 9 pour la ramener proche de 50 $\Omega$.<br>
+                        • **Nécessite impérativement une boîte d'accord (ATU)** intégrée ou externe pour ajuster le ROS exact sur chaque bande.
+                    </p>
+                </div>
+
+                <div class="bg-rf-dark border border-rf-border rounded-xl p-4 space-y-2">
+                    <div class="font-semibold text-rf-purple flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-full bg-rf-purple/20 text-rf-purple flex items-center justify-center text-xs">3</span>
+                        Choke RF & Contrepoids
+                    </div>
+                    <p class="text-gray-400 text-xs leading-relaxed">
+                        • **Contrepoids :** Un brin de **0.05 $\lambda$** (environ 2m pour 7 MHz) connecté à la masse de l'UNUN stabilise l'accord et évite d'utiliser la gaine du coaxial.<br>
+                        • **Choke de ligne (1:1) :** Placez un choc RF en ferrite sur le câble coaxial à environ **2 à 3 mètres de l'UNUN** pour bloquer les courants de gaine (RFI) et éliminer les brûlures HF sur votre émetteur.
+                    </p>
+                </div>
+            </div>
+
+            <div class="p-4 bg-rf-dark/60 rounded-xl border border-rf-border/50 text-xs text-gray-400 font-mono flex flex-wrap justify-between gap-4">
+                <div><strong>Formule EFHW ($\lambda/2$) :</strong> $L = \frac{299.792}{2 \times F_{\text{MHz}}} \times VF$</div>
+                <div><strong>Torode Recommandé :</strong> FT240-43 (100W HF) ou FT140-43 (QRP)</div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Logic JavaScript -->
+    <script>
+        // Éléments du DOM
+        const freqInput = document.getElementById('frequency');
+        const vfInput = document.getElementById('velocityFactor');
+        const freqDisplay = document.getElementById('freqDisplay');
+        const vfDisplay = document.getElementById('vfDisplay');
+        const geometrySelect = document.getElementById('geometrySelect');
+
+        // Outputs DOM
+        const mainWireM = document.getElementById('mainWireM');
+        const mainWireFeet = document.getElementById('mainWireFeet');
+        const counterpoiseM = document.getElementById('counterpoiseM');
+        const counterpoiseFeet = document.getElementById('counterpoiseFeet');
+        const inputImpVal = document.getElementById('inputImpVal');
+        const coaxImpVal = document.getElementById('coaxImpVal');
+        const harmonicsList = document.getElementById('harmonicsList');
+        const harmonicsTitle = document.getElementById('harmonicsTitle');
+        const ununBadge = document.getElementById('ununBadge');
+
+        // SVG Elements
+        const svgUnunLabel = document.getElementById('svgUnunLabel');
+        const svgMainWireLabel = document.getElementById('svgMainWireLabel');
+        const svgCounterpoiseLabel = document.getElementById('svgCounterpoiseLabel');
+        const schemaRatioText = document.getElementById('schemaRatioText');
+        const schemaToursText = document.getElementById('schemaToursText');
+        const schemaCapacitorText = document.getElementById('schemaCapacitorText');
+        const schemaImpText = document.getElementById('schemaImpText');
+        const svgMainWire = document.getElementById('svgMainWire');
+
+        function selectBand(freq, bandName) {
+            freqInput.value = freq;
+            updateCalculations();
+        }
+
+        function setCustomWireMeters(meters) {
+            // Sélectionner automatiquement le 9:1 UNUN
+            document.querySelector('input[name="ununType"][value="9"]').checked = true;
+            updateCalculations(meters);
+        }
+
+        function updateCalculations(overrideMeters = null) {
+            let freq = parseFloat(freqInput.value);
+            let vf = parseFloat(vfInput.value);
+
+            if (isNaN(freq) || freq <= 0) freq = 7.10;
+            if (isNaN(vf) || vf <= 0 || vf > 1) vf = 0.95;
+
+            const ununRatio = parseInt(document.querySelector('input[name="ununType"]:checked').value);
+            const C = 299.792458; // Vitesse de la lumière en megamètres/s
+
+            // Longueur d'onde fondamentale en mètres
+            const lambdaMeters = C / freq;
+
+            let wireLengthMeters = 0;
+            let counterpoiseMeters = lambdaMeters * 0.05; // ~0.05 lambda
+
+            if (overrideMeters !== null) {
+                wireLengthMeters = overrideMeters;
+            } else {
+                if (ununRatio === 49 || ununRatio === 64) {
+                    // EFHW : Demi-onde résonnante
+                    wireLengthMeters = (lambdaMeters / 2) * vf;
+                } else if (ununRatio === 9) {
+                    // Random wire : Par défaut 16.2m si non précisé
+                    wireLengthMeters = 16.2;
+                } else {
+                    // 1:1 Dipôle ou fil direct
+                    wireLengthMeters = (lambdaMeters / 2) * vf;
+                }
+            }
+
+            const wireLengthFeet = wireLengthMeters * 3.28084;
+            const counterpoiseFeetVal = counterpoiseMeters * 3.28084;
+
+            // Calculs d'impédance
+            let zInput = 50 * ununRatio;
+            if (ununRatio === 49) zInput = 2450;
+            if (ununRatio === 64) zInput = 3200;
+            if (ununRatio === 9) zInput = 450;
+            if (ununRatio === 1) zInput = 50;
+
+            // Mise à jour de l'affichage texte
+            freqDisplay.textContent = `${freq.toFixed(3)} MHz`;
+            vfDisplay.textContent = vf.toFixed(2);
+
+            mainWireM.innerHTML = `${wireLengthMeters.toFixed(2)} <span class="text-base text-gray-400 font-sans">mètres</span>`;
+            mainWireFeet.textContent = `${wireLengthFeet.toFixed(1)} ft / ${(wireLengthMeters * 100).toFixed(0)} cm`;
+
+            counterpoiseM.innerHTML = `${counterpoiseMeters.toFixed(2)} <span class="text-xs text-gray-400 font-sans">mètres</span>`;
+            counterpoiseFeet.textContent = `${counterpoiseFeetVal.toFixed(1)} ft (~0.05 λ)`;
+
+            inputImpVal.textContent = `~${zInput} Ω`;
+            coaxImpVal.textContent = `50.0 Ω (ROS ≈ 1.1:1)`;
+
+            // Mise à jour des badges et schémas internes
+            svgUnunLabel.textContent = `${ununRatio}:1`;
+            schemaRatioText.textContent = `Ratio ${ununRatio}:1`;
+
+            if (ununRatio === 49) {
+                ununBadge.textContent = "UNUN 49:1 (EFHW Résonnante)";
+                ununBadge.className = "px-2.5 py-1 text-xs rounded-lg bg-rf-accent/20 text-rf-accent font-mono border border-rf-accent/30 self-start sm:self-auto";
+                schemaToursText.textContent = "2 tours (prim) / 14 tours (sec)";
+                schemaCapacitorText.textContent = "+ Capa 100pF 1kV (C1)";
+                schemaImpText.textContent = "Z_in: ~2.45 kΩ";
+                renderHarmonicsEFHW(freq);
+            } else if (ununRatio === 64) {
+                ununBadge.textContent = "UNUN 64:1 (EFHW High Z)";
+                ununBadge.className = "px-2.5 py-1 text-xs rounded-lg bg-rf-purple/20 text-rf-purple font-mono border border-rf-purple/30 self-start sm:self-auto";
+                schemaToursText.textContent = "2 tours (prim) / 16 tours (sec)";
+                schemaCapacitorText.textContent = "+ Capa 100pF 1kV (C1)";
+                schemaImpText.textContent = "Z_in: ~3.2 kΩ";
+                renderHarmonicsEFHW(freq);
+            } else if (ununRatio === 9) {
+                ununBadge.textContent = "UNUN 9:1 (Random Wire + ATU)";
+                ununBadge.className = "px-2.5 py-1 text-xs rounded-lg bg-rf-emerald/20 text-rf-emerald font-mono border border-rf-emerald/30 self-start sm:self-auto";
+                schemaToursText.textContent = "9 tours trifilaires";
+                schemaCapacitorText.textContent = "Sans condensateur C1";
+                schemaImpText.textContent = "Z_in: ~450 Ω (Non-résonnant)";
+                renderRandomWireInfo();
+            } else {
+                ununBadge.textContent = "Choke 1:1 (Isolateur de ligne)";
+                ununBadge.className = "px-2.5 py-1 text-xs rounded-lg bg-rf-amber/20 text-rf-amber font-mono border border-rf-amber/30 self-start sm:self-auto";
+                schemaToursText.textContent = "8-10 tours RG58 sur tore";
+                schemaCapacitorText.textContent = "Symétriseur de ligne";
+                schemaImpText.textContent = "Z_in: 50 Ω Direct";
+                renderDirectInfo();
+            }
+
+            // Mise à jour SVG
+            svgMainWireLabel.textContent = `L = ${wireLengthMeters.toFixed(2)} m`;
+            svgCounterpoiseLabel.textContent = `Contrepoids = ${counterpoiseMeters.toFixed(2)} m`;
+
+            // Géométrie visuelle
+            const geom = geometrySelect.value;
+            if (geom === 'invertedL') {
+                svgMainWire.setAttribute('d', 'M 99 274 L 99 120 L 466 120');
+            } else if (geom === 'horizontal') {
+                svgMainWire.setAttribute('d', 'M 99 140 L 466 140');
+            } else {
+                // Sloper
+                svgMainWire.setAttribute('d', 'M 99 274 L 466 104');
+            }
+        }
+
+        function renderHarmonicsEFHW(baseFreq) {
+            harmonicsTitle.textContent = "Harmoniques Résonnantes (Multi-bandes sans ATU) :";
+            harmonicsList.innerHTML = '';
+            
+            for (let n = 1; n <= 4; n++) {
+                const harmFreq = baseFreq * n;
+                if (harmFreq > 30 && baseFreq < 30) continue; // Rester en HF si base en HF
+                
+                const chip = document.createElement('div');
+                chip.className = "px-2 py-1 bg-rf-card border border-rf-accent/40 rounded text-rf-accent";
+                chip.innerHTML = `<span class="text-gray-400">n=${n}:</span> ${harmFreq.toFixed(2)} MHz`;
+                harmonicsList.appendChild(chip);
+            }
+        }
+
+        function renderRandomWireInfo() {
+            harmonicsTitle.textContent = "Statut Longueur Non-Résonnante :";
+            harmonicsList.innerHTML = `
+                <div class="px-2.5 py-1 bg-rf-emerald/10 border border-rf-emerald/40 rounded text-rf-emerald text-xs">
+                    ★ Fil non-résonnant : Nécessite une boîte d'accord (ATU) sur toutes les bandes HF.
+                </div>
+            `;
+        }
+
+        function renderDirectInfo() {
+            harmonicsTitle.textContent = "Alimentation Directe 50 Ω :";
+            harmonicsList.innerHTML = `
+                <div class="px-2.5 py-1 bg-rf-amber/10 border border-rf-amber/40 rounded text-rf-amber text-xs">
+                    Résonnance stricte à λ/2 sur la fréquence fondamentale uniquement.
+                </div>
+            `;
+        }
+
+        window.onload = function() {
+            updateCalculations();
+        };
+    </script>
+</body>
+</html>
